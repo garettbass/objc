@@ -1,0 +1,17 @@
+{
+    "version": "0.1.0",
+    "tasks": [
+        {
+            "taskName": "debug",
+            "isShellCommand": true,
+            "osx": {
+                "command": "c++",
+                "args":[
+                    "-std=c++11",
+                    "-o ${workspaceRoot}/.build/main",
+                    "${workspaceRoot}/source/main.cpp"
+                ]
+            }
+        }
+    ]
+}

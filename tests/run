@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+testdir="$(cd "$(dirname "$0")" && pwd)"
+testrun="$testdir/testrun"
+
+CXX="c++ -std=c++11"
+FRAMEWORKS="-framework CoreFoundation -framework Foundation -framework Cocoa"
+
+# $CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.mm" -o "$testrun" || exit 1
+# "$testrun"
+# rm "$testrun"
+
+$CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.cpp" -o "$testrun" || exit 1
+"$testrun"
+rm "$testrun"

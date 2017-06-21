@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "__config": "cpp",
+        "__functional_base": "cpp",
+        "__locale": "cpp",
+        "cstddef": "cpp",
+        "exception": "cpp",
+        "functional": "cpp",
+        "initializer_list": "cpp",
+        "locale": "cpp",
+        "memory": "cpp",
+        "new": "cpp",
+        "stdexcept": "cpp",
+        "typeinfo": "cpp"
+    }
+}

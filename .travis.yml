@@ -1,0 +1,12 @@
+language: cpp
+compiler: clang
+git:
+  depth: 3
+branches:
+  only:
+    - master
+script: ./tests/run
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode8

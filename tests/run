@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
+set -ev
 testdir="$(cd "$(dirname "$0")" && pwd)"
 testrun="$testdir/testrun"
 
-CXX="c++ -std=c++11"
+CXX="clang++ -std=c++11"
 FRAMEWORKS="-framework CoreFoundation -framework Foundation -framework Cocoa"
 
-# $CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.mm" -o "$testrun" || exit 1
-# "$testrun"
-# rm "$testrun"
+rm -f "$testrun"
 
-$CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.cpp" -o "$testrun" || exit 1
+# $CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.mm" -o "$testrun" 
+# "$testrun"
+# rm -f "$testrun"
+
+$CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.cpp" -o "$testrun" 
 "$testrun"
-rm "$testrun"
+rm -f "$testrun"

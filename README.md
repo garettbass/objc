@@ -1,5 +1,7 @@
 # An Objective-C API for C++
 
+[![Build Status](https://travis-ci.org/garettbass/objc.svg?branch=master)](https://travis-ci.org/garettbass/objc)
+
 ``` C++
 #include <objc/objc> // or <objc/objc.hpp>
 ```

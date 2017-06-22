@@ -78,5 +78,5 @@ int main(int argc, char * argv[]) {
     }
 
     const int testFailureCount = session.run();
-    return std::max(testFailureCount,255);
+    return std::min(testFailureCount,255);
 }

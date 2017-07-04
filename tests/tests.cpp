@@ -1,33 +1,35 @@
-#define CATCH_CONFIG_RUNNER
-#include "catch.hpp"
+#define DOCTEST_CONFIG_IMPLEMENT
+#include "doctest.hpp"
 
+#include <algorithm>
+#include <string>
 #include "../objc.hpp"
 
-using namespace Catch;
+using namespace doctest;
 
 TEST_CASE("objc::class_id") {
     objc::class_id NSObject { "NSObject" };
     REQUIRE(NSObject.cls != nullptr);
-    REQUIRE_THAT(NSObject.name(),Equals("NSObject"));
+    REQUIRE(NSObject.name() == std::string("NSObject"));
 }
 
 TEST_CASE("objc::protocol") {
     objc::protocol NSTextViewDelegate { "NSTextViewDelegate" };
     REQUIRE(NSTextViewDelegate.proto != nullptr);
-    REQUIRE_THAT(NSTextViewDelegate.name(),Equals("NSTextViewDelegate"));
+    REQUIRE(NSTextViewDelegate.name() == std::string("NSTextViewDelegate"));
 }
 
 TEST_CASE("objc::selector") {
     objc::selector alloc { "alloc" };
     REQUIRE(alloc.sel != nullptr);
-    REQUIRE_THAT(alloc.name(),Equals("alloc"));
+    REQUIRE(alloc.name() == std::string("alloc"));
 }
 
 TEST_CASE("objc::super") {
     objc::class_id NSObject { "NSObject" };
-    objc::class_definition TestClass1 { "TestClass1",NSObject };
+    objc::class_id TestClass1 { "TestClass1",NSObject };
     REQUIRE(TestClass1.cls != nullptr);
-    REQUIRE_THAT(TestClass1.name(),Equals("TestClass1"));
+    REQUIRE(TestClass1.name() == std::string("TestClass1"));
     auto obj = objc::alloc(TestClass1);
     auto super = objc::super(obj);
     REQUIRE(objc::classof(super) == NSObject);
@@ -37,15 +39,15 @@ TEST_CASE("objc::retain/release") {
     static bool initialized = false;
     static bool deallocated = false;
 
-    objc::class_definition TestClass2 {
+    objc::class_id TestClass2 {
         "TestClass2","NSObject",
         objc::method("init",[](id self,SEL sel){
-            self = objc::call<id>(objc::super(self),sel);
+            self = objc::message<id()>{sel}(objc::super(self));
             initialized = true;
         }),
         objc::method("dealloc",[](id self,SEL sel){
             deallocated = true;
-            objc::call<void>(objc::super(self),sel);
+            objc::message<void()>{sel}(objc::super(self));
         })
     };
 
@@ -69,14 +71,7 @@ TEST_CASE("objc::retain/release") {
 
 int main(int argc, char * argv[]) {
     objc::autoreleasepool autoreleasepool;
-
-    Catch::Session session;
-
-    const int commandLineError = session.applyCommandLine(argc, argv);
-    if (commandLineError) {
-        return commandLineError;
-    }
-
-    const int testFailureCount = session.run();
-    return std::min(testFailureCount,255);
+    Context context { argc, argv };
+    const int failures = context.run();
+    return std::min(failures,255);
 }

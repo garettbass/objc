@@ -201,13 +201,21 @@ std::ostream& operator <<(std::ostream& o, const large_struct s) {
 
 //------------------------------------------------------------------------------
 
-objc::class_definition
+objc::class_id
 CustomClass {
     "CustomClass","DerivedClass",
 
     objc::protocol("NSApplicationDelegate"),
 
-    objc::member<double>("doubleVariable"),
+    objc::variable<double>("doubleVariable"),
+
+    objc::method(
+        "init",[](id self,SEL sel){
+            self = objc::message<id()>{sel}(objc::super(self));
+            objc::accessor<double>(self,"doubleVariable")(self) = 1.0;
+            return self;
+        }
+    ),
 
     objc::method(
         "method",[](id,SEL){
@@ -254,52 +262,76 @@ int main() {
     const objc::unique_ptr obj = objc::make_unique(CustomClass);
     echo(objc::get_retain_count(obj));
 
-    const objc::member_accessor<int>
+    const objc::accessor<int>
     intVariable { obj, "intVariable" };
     echo(intVariable(obj));
     intVariable(obj) = 2;
     echo(intVariable(obj));
 
-    const objc::member_accessor<float>
+    const objc::accessor<float>
     floatVariable { obj, "floatVariable" };
     echo(floatVariable(obj));
     floatVariable(obj) = 2.f;
     echo(floatVariable(obj));
 
-    const objc::member_accessor<double>
+    const objc::accessor<double>
     doubleVariable { obj, "doubleVariable" };
     echo(doubleVariable(obj));
     doubleVariable(obj) = 3.0;
     echo(doubleVariable(obj));
 
-    const objc::selector
+    objc::message
+    <long double()>
+    getLongDouble { "getLongDouble" };
+
+    objc::message
+    <double()>
+    getDouble { "getDouble" };
+
+    objc::message
+    <float()>
+    getFloat { "getFloat" };
+
+    objc::message
+    <small_struct()>
+    getSmallStruct { "getSmallStruct" };
+
+    objc::message
+    <medium_struct()>
+    getMediumStruct { "getMediumStruct" };
+
+    objc::message
+    <large_struct()>
+    getLargeStruct { "getLargeStruct" };
+
+    objc::message
+    <void()>
+    method { "method" };
+
+    objc::message
+    <void(int,float,double,long double,small_struct,medium_struct,large_struct,int*)>
     methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt {
         "methodWithInt:float32:float64:float128:smallStruct:mediumStruct:largeStruct:andPointerToInt:"
     };
 
-    const objc::method_implementation
+    objc::implementation
     <void(int,float,double,long double,small_struct,medium_struct,large_struct,int*)>
     CustomClass_methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt {
         CustomClass,
         "methodWithInt:float32:float64:float128:smallStruct:mediumStruct:largeStruct:andPointerToInt:"
     };
 
-    const objc::method_interface
-    <void(int,float,double,long double,small_struct,medium_struct,large_struct,int*)>
-    virtual_methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt {
-        "methodWithInt:float32:float64:float128:smallStruct:mediumStruct:largeStruct:andPointerToInt:"
-    };
-
     std::cout << '\n';
-    echo(objc::call<long double>(objc::super(obj),"getLongDouble"));
-    echo(objc::call<double>(objc::super(obj),"getDouble"));
-    echo(objc::call<float>(objc::super(obj),"getFloat"));
-    echo(objc::call<small_struct>(objc::super(obj),"getSmallStruct"));
-    echo(objc::call<medium_struct>(objc::super(obj),"getMediumStruct"));
-    echo(objc::call<large_struct>(objc::super(obj),"getLargeStruct"));
-    objc::call<void>(objc::super(obj),"method");
-    objc::call<void>(objc::super(obj),
-        methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt,
+    const auto super = objc::super(obj);
+    echo(getLongDouble(super));
+    echo(getDouble(super));
+    echo(getFloat(super));
+    echo(getSmallStruct(super));
+    echo(getMediumStruct(super));
+    echo(getLargeStruct(super));
+    method(super);
+    methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt(
+        super,
         1,
         2.f,
         3.0,
@@ -311,25 +343,14 @@ int main() {
     );
 
     std::cout << '\n';
-    echo(objc::call<long double>(obj,"getLongDouble"));
-    echo(objc::call<double>(obj,"getDouble"));
-    echo(objc::call<float>(obj,"getFloat"));
-    echo(objc::call<small_struct>(obj,"getSmallStruct"));
-    echo(objc::call<medium_struct>(obj,"getMediumStruct"));
-    echo(objc::call<large_struct>(obj,"getLargeStruct"));
-    objc::call<void>(obj,"method");
-    objc::call<void>(obj,
-        methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt,
-        1,
-        2.f,
-        3.0,
-        4.0L,
-        small_struct{1.f},
-        medium_struct{1.f,2.f,3.f,4.f},
-        large_struct{1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f},
-        nullptr
-    );
-    CustomClass_methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt(
+    echo(getLongDouble(obj));
+    echo(getDouble(obj));
+    echo(getFloat(obj));
+    echo(getSmallStruct(obj));
+    echo(getMediumStruct(obj));
+    echo(getLargeStruct(obj));
+    method(obj);
+    methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt(
         obj,
         1,
         2.f,
@@ -340,7 +361,8 @@ int main() {
         large_struct{1.f,2.f,3.f,4.f,5.f,6.f,7.f,8.f},
         nullptr
     );
-    virtual_methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt(
+
+    CustomClass_methodWithInt_float32_float64_float128_smallStruct_mediumStruct_largeStruct_andPointerToInt(
         obj,
         1,
         2.f,

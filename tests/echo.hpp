@@ -7,11 +7,11 @@ void echo(const char* expr, const T& value) {
 }
 
 void echo(const char* expr, const long double value) {
-    std::cout << expr << ": " << value << "L\n";
+    std::cout << expr << ": " << value << '\n';
 }
 
 void echo(const char* expr, const float value) {
-    std::cout << expr << ": " << value << "f\n";
+    std::cout << expr << ": " << value << '\n';
 }
 
 void echo(const char* expr, const char value) {

@@ -40,15 +40,21 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     struct object {
-        id_t const id;
+        id_t const id = nullptr;
 
-        object(id_t obj) : id(obj) {}
+        object(decltype(nullptr)): id(nullptr) {}
 
-        object(const unique_ptr& obj) : id(obj.get()) {}
+        object(id_t obj): id(obj) {}
 
-        object(const shared_ptr& obj) : id(obj.get()) {}
+        object(const unique_ptr& obj): id(obj.get()) {}
 
-        object(const struct class_id& cls) : id((id_t&)(cls)) {}
+        object(const shared_ptr& obj): id(obj.get()) {}
+
+        object(const struct class_id& cls): id((id_t&)(cls)) {}
+
+        explicit object(void* obj): id(id_t(obj)) {}
+
+        explicit object(uintptr_t obj): id(id_t(obj)) {}
 
         explicit operator bool() const { return id != nullptr; }
 
@@ -64,6 +70,8 @@ namespace OBJC_NAMESPACE {
 
     struct protocol {
         protocol_t* const proto = nullptr;
+
+        protocol(decltype(nullptr)): proto(nullptr) {}
 
         protocol(protocol_t* const proto)
         : proto(proto)
@@ -81,18 +89,20 @@ namespace OBJC_NAMESPACE {
         bool operator !=(const protocol& p) const { return proto != p.proto; }
 
         const char* name() const {
-            return proto ? protocol_getName(proto) : nullptr;
+            return proto ? protocol_getName(proto): nullptr;
         }
     };
 
     //--------------------------------------------------------------------------
 
     struct selector {
-        sel_t const sel;
+        sel_t const sel = nullptr;
 
-        selector(sel_t sel) : sel(sel) {}
+        selector(decltype(nullptr)): sel(nullptr) {}
 
-        selector(const char* name) : sel(sel_getUid(name)) {}
+        selector(sel_t sel): sel(sel) {}
+
+        selector(const char* name): sel(sel_getUid(name)) {}
 
         explicit operator bool() const { return sel != nullptr; }
 
@@ -101,7 +111,7 @@ namespace OBJC_NAMESPACE {
         bool operator ==(const selector& s) const { return sel == s.sel; }
         bool operator !=(const selector& s) const { return sel != s.sel; }
 
-        const char* name() const { return sel ? sel_getName(sel) : nullptr; }
+        const char* name() const { return sel ? sel_getName(sel): nullptr; }
     };
 
     //--------------------------------------------------------------------------
@@ -123,7 +133,7 @@ namespace OBJC_NAMESPACE {
 
     template<typename Value>
     struct variable {
-        const char* const name;
+        const char* const name = nullptr;
 
         variable(const char* name)
         : name(name) {}
@@ -161,17 +171,19 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     struct class_id {
-        class_t const cls;
+        class_t const cls = nullptr;
 
-        class_id(class_t cls) : cls(cls) {}
+        class_id(decltype(nullptr)): cls(nullptr) {}
 
-        class_id(const char* name) : cls(objc_getClass(name)) {}
+        class_id(class_t cls): cls(cls) {}
 
-        class_id(id_t obj) : cls(object_getClass(obj)) {}
+        class_id(const char* name): cls(objc_getClass(name)) {}
 
-        class_id(const unique_ptr& obj) : cls(object_getClass(obj.get())) {}
+        class_id(id_t obj): cls(object_getClass(obj)) {}
 
-        class_id(const shared_ptr& obj) : cls(object_getClass(obj.get())) {}
+        class_id(const unique_ptr& obj): cls(object_getClass(obj.get())) {}
+
+        class_id(const shared_ptr& obj): cls(object_getClass(obj.get())) {}
 
         template<typename... Defs>
         class_id(const char* name, class_id super, Defs&&... defs)
@@ -246,7 +258,7 @@ namespace OBJC_NAMESPACE {
 
         accessor(class_id cls, const char* name)
         : ivar(class_getInstanceVariable(cls,name))
-        , offset(ivar ? ivar_getOffset(ivar) : 0) {}
+        , offset(ivar ? ivar_getOffset(ivar): 0) {}
 
         explicit operator bool() const { return ivar != nullptr; }
 
@@ -372,7 +384,7 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     struct autoreleasepool : private unique_ptr {
-        autoreleasepool() : unique_ptr(alloc("NSAutoreleasePool")) {}
+        autoreleasepool(): unique_ptr(alloc("NSAutoreleasePool")) {}
     };
 
     //--------------------------------------------------------------------------

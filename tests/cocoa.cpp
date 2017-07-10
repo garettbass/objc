@@ -101,6 +101,8 @@ namespace macos {
 
     public:
 
+        NSApplication() = default;
+
         operator id() const { return self; }
 
         void activate() const { _activateIgnoringOtherApps(self,true); }
@@ -135,6 +137,8 @@ namespace macos {
 
     public:
 
+        NSDate() = default;
+
         id withTimeIntervalSinceNow(double seconds) const {
             return _dateWithTimeIntervalSinceNow(cls,seconds);
         }
@@ -155,6 +159,8 @@ namespace macos {
         {"postNotificationName:object:"};
 
     public:
+
+        NSNotificationCenter() = default;
 
         void applicationDidFinishLaunchingNotification() const {
             _postNotificationName_object(

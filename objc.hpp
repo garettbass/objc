@@ -11,6 +11,16 @@
 #endif // OBJC_NAMESPACE
 namespace OBJC_NAMESPACE {
 
+    #if defined(__LP64__) && __LP64__
+        using CGFloat    = double;
+        using NSUInteger = unsigned long;
+        using NSInteger  = signed long;
+    #else
+        using CGFloat    = float;
+        using NSUInteger = unsigned int;
+        using NSInteger  = signed int;
+    #endif
+
     //--------------------------------------------------------------------------
 
     using class_t = ::Class;
@@ -390,5 +400,3 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
 } // namespace OBJC_NAMESPACE
-
-#undef OBJC_NAMESPACE

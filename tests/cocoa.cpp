@@ -124,7 +124,7 @@ namespace macos {
 
         void updateWindows() const { _updateWindows(self); }
 
-    } const application;
+    } const application {};
 
     //--------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ namespace macos {
             return _dateWithTimeIntervalSinceNow(cls,seconds);
         }
 
-    } const date;
+    } const date {};
 
     //--------------------------------------------------------------------------
 
@@ -173,7 +173,7 @@ namespace macos {
                 self,NSApplicationWillTerminateNotification,application
             );
         }
-    } const notificationCenter;
+    } const notificationCenter {};
 
     //--------------------------------------------------------------------------
 

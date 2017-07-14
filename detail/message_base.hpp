@@ -1,5 +1,11 @@
 #pragma once
 
+#if OBJC_CPU_ARM
+    #define objc_msgSend_fpret objc_msgSend
+    #define objc_msgSend_stret objc_msgSend
+    #define objc_msgSendSuper_stret objc_msgSendSuper
+#endif
+
 template<typename Result, typename... Args>
 using send_self_t = Result(*)(id_t,sel_t,Args...);
 
@@ -87,13 +93,13 @@ struct message_small_result<Result(Args...)> {
 //------------------------------------------------------------------------------
 
 template<typename T>
-struct message_result_traits {
-    enum : size_t { SIZE = sizeof(T) };
+struct message_result_size {
+    enum : size_t { value = sizeof(T) };
 };
 
 template<>
-struct message_result_traits<void> {
-    enum : size_t { SIZE = 0 };
+struct message_result_size<void> {
+    enum : size_t { value = 0 };
 };
 
 //------------------------------------------------------------------------------
@@ -106,7 +112,7 @@ struct message_base<Result(Args...)> : std::conditional<
     std::is_floating_point<Result>::value,
     message_float_result<Result(Args...)>,
     typename std::conditional<
-        (message_result_traits<Result>::SIZE <= sizeof(long double)),
+        (message_result_size<Result>::value <= sizeof(long double)),
         message_small_result<Result(Args...)>,
         message_large_result<Result(Args...)>
     >::type

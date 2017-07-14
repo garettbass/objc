@@ -1,4 +1,8 @@
 #pragma once
+
+#include "detail/platform.hpp"
+#if OBJC_OS_APPLE
+
 #include <cassert>
 #include <memory>
 #include <type_traits>
@@ -163,16 +167,17 @@ namespace OBJC_NAMESPACE {
         template<typename Callback>
         method(selector sel, Callback&& callback)
         : method(sel, imp_t(function_cast(callback))) {
-            using argument_0 = argument_type<Callback,0>;
+            using arg0_t = argument_type<Callback,0>;
             static_assert(
-                std::is_same<argument_0,::id>::value or
-                std::is_same<argument_0,object>::value,
+                std::is_same<arg0_t,::id>::value or
+                std::is_same<arg0_t,object>::value or
+                std::is_pointer<arg0_t>::value,
                 "first argument must be of type 'id' or 'objc::object'"
             );
-            using argument_1 = argument_type<Callback,1>;
+            using arg1_t = argument_type<Callback,1>;
             static_assert(
-                std::is_same<argument_1,::SEL>::value or
-                std::is_same<argument_1,selector>::value,
+                std::is_same<arg1_t,::SEL>::value or
+                std::is_same<arg1_t,selector>::value,
                 "second argument must be of type 'SEL' or 'objc::selector'"
             );
         }
@@ -198,6 +203,7 @@ namespace OBJC_NAMESPACE {
         template<typename... Defs>
         class_id(const char* name, class_id super, Defs&&... defs)
         : class_id(objc_allocateClassPair(super,name,0)) {
+            assert(cls||!"failed to allocate class");
             struct local { static void unpack(...) {} };
             local::unpack(((define(super,defs)),'\0')...);
             objc_registerClassPair(cls);
@@ -400,3 +406,5 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
 } // namespace OBJC_NAMESPACE
+
+#endif // OBJC_OS_APPLE

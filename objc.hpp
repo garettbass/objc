@@ -282,6 +282,12 @@ namespace OBJC_NAMESPACE {
             assert(ivar);
             return *((T*)(ivar ? (size_t(obj) + offset) : size_t(0)));
         }
+
+        template<typename Self>
+        T& operator ()(Self* obj) const {
+            assert(ivar);
+            return *((T*)(ivar ? (size_t(obj) + offset) : size_t(0)));
+        }
     };
 
     template<typename T>
@@ -327,6 +333,11 @@ namespace OBJC_NAMESPACE {
         Result operator ()(object obj, Args... args) const {
             return imp(obj,sel,std::forward<Args>(args)...);
         }
+
+        template<typename Self>
+        Result operator ()(Self* obj, Args... args) const {
+            return imp(id_t(obj),sel,std::forward<Args>(args)...);
+        }
     };
 
     //--------------------------------------------------------------------------
@@ -344,11 +355,16 @@ namespace OBJC_NAMESPACE {
         : sel(sel) {}
 
         Result operator ()(object obj, Args... args) const {
-            return send((id_t)(obj),sel,std::forward<Args>(args)...);
+            return send(id_t(obj),sel,std::forward<Args>(args)...);
         }
 
         Result operator ()(super sup, Args... args) const {
             return send((super_t&)(sup),sel,std::forward<Args>(args)...);
+        }
+
+        template<typename Self>
+        Result operator ()(Self* obj, Args... args) const {
+            return send(id_t(obj),sel,std::forward<Args>(args)...);
         }
 
         using message_base<Result(Args...)>::send;
@@ -404,6 +420,95 @@ namespace OBJC_NAMESPACE {
     };
 
     //--------------------------------------------------------------------------
+
+    struct CGPoint { CGFloat x,y; };
+    struct CGSize  { CGFloat width,height; };
+    struct CGRect  { CGPoint origin; CGSize size; };
+
+    //--------------------------------------------------------------------------
+
+    using NSPoint = CGPoint;
+    using NSSize  = CGSize;
+    using NSRect  = CGRect;
+
+    //--------------------------------------------------------------------------
+
+    template<typename NSObject>
+    struct NSObjectBase {
+
+        static struct API {
+
+            class_id cls {"NSObject"};
+
+            message<NSObject*()>
+            alloc {"alloc"};
+
+            message<NSObject*()>
+            autorelease {"autorelease"};
+
+            message<void()>
+            dealloc {"dealloc"};
+
+            message<NSObject*()>
+            init {"init"};
+
+            message<void()>
+            release {"release"};
+
+            message<NSObject*()>
+            retain {"retain"};
+
+        } api;
+
+        NSObjectBase()                                 = delete;
+        NSObjectBase(NSObjectBase&&)                   = delete;
+        NSObjectBase(const NSObjectBase&)              = delete;
+        NSObjectBase& operator = (NSObjectBase&&)      = delete;
+        NSObjectBase& operator = (const NSObjectBase&) = delete;
+       ~NSObjectBase()                                 = delete;
+
+    };
+
+    template<typename NSObject>
+    typename
+    NSObjectBase<NSObject>::API
+    NSObjectBase<NSObject>::api {};
+
+    //--------------------------------------------------------------------------
+
+    struct NSObject : NSObjectBase<NSObject> {
+    protected:
+
+        template<typename ObjectType>
+        static
+        ObjectType*
+        alloc() {
+            return (ObjectType*)api.alloc(ObjectType::api.cls);
+        }
+
+        template<typename ObjectType>
+        ObjectType*
+        init() { return (ObjectType*)api.init(this); }
+
+    public:
+
+        static
+        NSObject*
+        alloc() { return alloc<NSObject>(); }
+
+        NSObject*
+        init() { return init<NSObject>(); }
+
+        NSObject*
+        retain() { return api.retain(this); }
+
+        void
+        release() { api.release(this); }
+
+        NSObject*
+        autorelease() { return api.autorelease(this); }
+
+    };
 
 } // namespace OBJC_NAMESPACE
 

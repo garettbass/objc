@@ -62,15 +62,22 @@ namespace macos {
 
     namespace objc = ::_app_macos_objc_namespace;
 
-    extern "C" {
+    using objc::id;
+    using objc::library;
 
-        extern id const NSDefaultRunLoopMode;
+    library Cocoa {"Cocoa.framework/Cocoa"};
 
-        extern id const NSApplicationDidFinishLaunchingNotification;
+    id const NSDefaultRunLoopMode {
+        Cocoa.constant("NSDefaultRunLoopMode")
+    };
 
-        extern id const NSApplicationWillTerminateNotification;
+    id const NSApplicationDidFinishLaunchingNotification {
+        Cocoa.constant("NSApplicationDidFinishLaunchingNotification")
+    };
 
-    } // extern "C"
+    id const NSApplicationWillTerminateNotification {
+        Cocoa.constant("NSApplicationWillTerminateNotification")
+    };
 
     //--------------------------------------------------------------------------
 

@@ -5,18 +5,15 @@
 #include <string>
 #include "../objc.hpp"
 
+using objc::id;
+using objc::SEL;
+
 using namespace doctest;
 
 TEST_CASE("objc::class_id") {
     objc::class_id NSObject { "NSObject" };
     REQUIRE(NSObject.cls != nullptr);
     REQUIRE(NSObject.name() == std::string("NSObject"));
-}
-
-TEST_CASE("objc::protocol") {
-    objc::protocol NSTextViewDelegate { "NSTextViewDelegate" };
-    REQUIRE(NSTextViewDelegate.proto != nullptr);
-    REQUIRE(NSTextViewDelegate.name() == std::string("NSTextViewDelegate"));
 }
 
 TEST_CASE("objc::selector") {

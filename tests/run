@@ -4,18 +4,18 @@ testdir="$(cd "$(dirname "$0")" && pwd)"
 testrun="$testdir/testrun"
 
 CXX="clang++ -std=c++11 -Wall"
-FRAMEWORKS="-framework CoreFoundation -framework Foundation -framework Cocoa"
+# FRAMEWORKS="-framework CoreFoundation -framework Foundation -framework Cocoa"
 
 rm -f "$testrun"
 
-$CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.mm" -o "$testrun"
+# $CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.mm" -o "$testrun"
 # "$testrun"
-rm -f "$testrun"
+# rm -f "$testrun"
 
-$CXX $CXXFLAGS $FRAMEWORKS "$testdir/cocoa.cpp" -o "$testrun"
+$CXX $CXXFLAGS "$testdir/cocoa.cpp" -o "$testrun"
 "$testrun"
 rm -f "$testrun"
 
-$CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.cpp" -o "$testrun"
+$CXX $CXXFLAGS "$testdir/tests.cpp" -o "$testrun"
 "$testrun"
 rm -f "$testrun"

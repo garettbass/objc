@@ -1,11 +1,5 @@
 #pragma once
 
-#if OBJC_CPU_ARM
-    #define objc_msgSend_fpret objc_msgSend
-    #define objc_msgSend_stret objc_msgSend
-    #define objc_msgSendSuper_stret objc_msgSendSuper
-#endif
-
 template<typename Result, typename... Args>
 using send_self_t = Result(*)(id_t,sel_t,Args...);
 

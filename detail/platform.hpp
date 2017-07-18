@@ -158,6 +158,7 @@
     defined(__x86_64__)
 
     // x86-64
+    #define OBJC_CPU_X86    1
     #define OBJC_CPU_X86_64 1
     #define OBJC_CPU_ID     x86_64
     #define OBJC_CPU_NAME   "x86-64"
@@ -172,6 +173,7 @@
 
     // x86
     #define OBJC_CPU_X86    1
+    #define OBJC_CPU_X86_32 1
     #define OBJC_CPU_ID     x86
     #define OBJC_CPU_NAME   "x86"
     #define OBJC_CPU_BITS   32

@@ -4,15 +4,20 @@
 #if OBJC_OS_APPLE
 
 #include <cassert>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <type_traits>
-#include <CoreFoundation/CoreFoundation.h> // CFSTR() macro
-#include <objc/runtime.h>
-#include <objc/message.h>
 
 #ifndef OBJC_NAMESPACE
 #define OBJC_NAMESPACE objc
 #endif // OBJC_NAMESPACE
+
+#include "detail/function_traits.hpp"
+#include "detail/library.hpp"
+#include "detail/CoreFoundation.hpp"
+#include "detail/Foundation.hpp"
+
 namespace OBJC_NAMESPACE {
 
     #if defined(__LP64__) && __LP64__
@@ -27,21 +32,21 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    using class_t = ::Class;
+    using class_t = Class;
 
-    using id_t = ::id;
+    using id_t = id;
 
-    using imp_t = ::IMP;
+    using imp_t = IMP;
 
-    using ivar_t = ::Ivar;
+    using ivar_t = Ivar;
 
-    using object_t = std::remove_pointer<id_t>::type;
+    using object_t = objc_object;
 
-    using protocol_t = ::Protocol;
+    using protocol_t = Protocol;
 
-    using sel_t = ::SEL;
+    using sel_t = SEL;
 
-    using super_t = ::objc_super;
+    using super_t = objc_super;
 
     //--------------------------------------------------------------------------
 
@@ -155,8 +160,6 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    #include "detail/function_traits.hpp"
-
     struct method {
         sel_t const sel = nullptr;
         imp_t const imp = nullptr;
@@ -169,14 +172,13 @@ namespace OBJC_NAMESPACE {
         : method(sel, imp_t(function_cast(callback))) {
             using arg0_t = argument_type<Callback,0>;
             static_assert(
-                std::is_same<arg0_t,::id>::value or
                 std::is_same<arg0_t,object>::value or
                 std::is_pointer<arg0_t>::value,
                 "first argument must be of type 'id' or 'objc::object'"
             );
             using arg1_t = argument_type<Callback,1>;
             static_assert(
-                std::is_same<arg1_t,::SEL>::value or
+                std::is_same<arg1_t,SEL>::value or
                 std::is_same<arg1_t,selector>::value,
                 "second argument must be of type 'SEL' or 'objc::selector'"
             );
@@ -433,10 +435,9 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    template<typename NSObject>
-    struct NSObjectBase {
+    struct NSObject {
 
-        static struct API {
+        static struct {
 
             class_id cls {"NSObject"};
 
@@ -460,23 +461,13 @@ namespace OBJC_NAMESPACE {
 
         } api;
 
-        NSObjectBase()                                 = delete;
-        NSObjectBase(NSObjectBase&&)                   = delete;
-        NSObjectBase(const NSObjectBase&)              = delete;
-        NSObjectBase& operator = (NSObjectBase&&)      = delete;
-        NSObjectBase& operator = (const NSObjectBase&) = delete;
-       ~NSObjectBase()                                 = delete;
+        NSObject()                             = delete;
+        NSObject(NSObject&&)                   = delete;
+        NSObject(const NSObject&)              = delete;
+        NSObject& operator = (NSObject&&)      = delete;
+        NSObject& operator = (const NSObject&) = delete;
+       ~NSObject()                             = delete;
 
-    };
-
-    template<typename NSObject>
-    typename
-    NSObjectBase<NSObject>::API
-    NSObjectBase<NSObject>::api {};
-
-    //--------------------------------------------------------------------------
-
-    struct NSObject : NSObjectBase<NSObject> {
     protected:
 
         template<typename ObjectType>
@@ -509,6 +500,8 @@ namespace OBJC_NAMESPACE {
         autorelease() { return api.autorelease(this); }
 
     };
+
+    decltype(NSObject::api) NSObject::api {};
 
 } // namespace OBJC_NAMESPACE
 

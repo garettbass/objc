@@ -11,6 +11,22 @@
 #endif
 
 //------------------------------------------------------------------------------
+// OBJC_CONCAT(x,y)
+//
+// Concatenate the macro-expanded results of arguments x and y.
+//
+#define  OBJC_CONCAT(x,y) _OBJC_CONCAT(x,y)
+#define _OBJC_CONCAT(x,y) x##y
+
+//------------------------------------------------------------------------------
+// OBJC_QUOTE(x)
+//
+// Surround the macro-expanded result of argument x in quotes.
+//
+#define  OBJC_QUOTE(x) _OBJC_QUOTE(x)
+#define _OBJC_QUOTE(x) #x
+
+//------------------------------------------------------------------------------
 
 #if defined(__clang__)
 
@@ -59,40 +75,48 @@
 
 #endif
 
+#define OBJC_CXX_FILE(file) OBJC_QUOTE(./cxx/OBJC_CXX_ID/file)
+
 //------------------------------------------------------------------------------
 
 #if defined(__ANDROID__)
 
     #define OBJC_OS_ANDROID    1
+    #define OBJC_OS_ID         android
     #define OBJC_OS_NAME       "Android"
+
+#elif defined(__linux)
+
+    #define OBJC_OS_LINUX      1
+    #define OBJC_OS_ID         linux
+    #define OBJC_OS_NAME       "Linux"
 
 #elif defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__)
 
     #define OBJC_OS_APPLE      1
     #define OBJC_OS_IOS        1
+    #define OBJC_OS_ID         ios
     #define OBJC_OS_NAME       "iOS"
-
-#elif defined(__linux)
-
-    #define OBJC_OS_LINUX      1
-    #define OBJC_OS_NAME       "Linux"
 
 #elif defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
 
     #define OBJC_OS_APPLE      1
     #define OBJC_OS_MACOS      1
+    #define OBJC_OS_ID         macos
     #define OBJC_OS_NAME       "macOS"
 
 #elif __cplusplus_winrt
 
     #define OBJC_OS_MICROSOFT  1
     #define OBJC_OS_WINRT      1
+    #define OBJC_OS_ID         winrt
     #define OBJC_OS_NAME       "WinRT"
 
 #elif defined(_WIN32)
 
     #define OBJC_OS_MICROSOFT  1
     #define OBJC_OS_WINDOWS    1
+    #define OBJC_OS_ID         windows
     #define OBJC_OS_NAME       "Windows"
 
 #else
@@ -101,6 +125,7 @@
 
 #endif
 
+#define OBJC_OS_FILE(file) OBJC_QUOTE(./cxx/OBJC_OS_ID/file)
 
 //------------------------------------------------------------------------------
 
@@ -174,7 +199,7 @@
     // x86
     #define OBJC_CPU_X86    1
     #define OBJC_CPU_X86_32 1
-    #define OBJC_CPU_ID     x86
+    #define OBJC_CPU_ID     x86_32
     #define OBJC_CPU_NAME   "x86"
     #define OBJC_CPU_BITS   32
 
@@ -183,6 +208,8 @@
     #error "unrecognized CPU architecture"
 
 #endif
+
+#define OBJC_CPU_FILE(file) OBJC_QUOTE(./cxx/OBJC_CPU_ID/file)
 
 //------------------------------------------------------------------------------
 

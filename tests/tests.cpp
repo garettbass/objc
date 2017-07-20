@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <string>
-#include "../objc.hpp"
+#include "../objc.inl"
 
 using objc::id;
 using objc::SEL;

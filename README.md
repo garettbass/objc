@@ -7,7 +7,7 @@
 ``` C++
 // optional: embed objc namespace in another namespace...
 // #define OBJC_PARENT_NAMESPACE mycoolnamespace
-#include <objc/objc> // or <objc/objc.hpp>
+#include <objc/objc.inl>
 ```
 
 ## Call Methods

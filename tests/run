@@ -8,14 +8,6 @@ CXX="clang++ -std=c++11 -Wall"
 
 rm -f "$testrun"
 
-# $CXX $CXXFLAGS $FRAMEWORKS "$testdir/tests.mm" -o "$testrun"
-# "$testrun"
-# rm -f "$testrun"
-
-$CXX $CXXFLAGS "$testdir/cocoa.cpp" -o "$testrun"
-"$testrun"
-rm -f "$testrun"
-
 $CXX $CXXFLAGS "$testdir/tests.cpp" -o "$testrun"
 "$testrun"
 rm -f "$testrun"

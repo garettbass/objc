@@ -6,7 +6,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <type_traits>
 
 #ifndef OBJC_NAMESPACE
@@ -50,24 +49,12 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    struct deleter { void operator ()(id_t obj) { CFRelease(obj); } };
-
-    using unique_ptr = std::unique_ptr<object_t,deleter>;
-
-    using shared_ptr = std::shared_ptr<object_t>;
-
-    //--------------------------------------------------------------------------
-
     struct object {
         id_t const id = nullptr;
 
         object(decltype(nullptr)): id(nullptr) {}
 
         object(id_t obj): id(obj) {}
-
-        object(const unique_ptr& obj): id(obj.get()) {}
-
-        object(const shared_ptr& obj): id(obj.get()) {}
 
         object(const struct class_id& cls): id((id_t&)(cls)) {}
 
@@ -198,10 +185,6 @@ namespace OBJC_NAMESPACE {
 
         class_id(id_t obj): cls(object_getClass(obj)) {}
 
-        class_id(const unique_ptr& obj): cls(object_getClass(obj.get())) {}
-
-        class_id(const shared_ptr& obj): cls(object_getClass(obj.get())) {}
-
         template<typename... Defs>
         class_id(const char* name, class_id super, Defs&&... defs)
         : class_id(objc_allocateClassPair(super,name,0)) {
@@ -246,12 +229,6 @@ namespace OBJC_NAMESPACE {
 
     inline
     class_id classof(id_t obj) { return { obj }; }
-
-    inline
-    class_id classof(const unique_ptr& obj) { return { obj }; }
-
-    inline
-    class_id classof(const shared_ptr& obj) { return { obj }; }
 
     inline
     class_id classof(super super) { return { super.super_class }; }
@@ -390,39 +367,6 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    inline
-    unique_ptr make_unique(class_id cls) {
-        return unique_ptr { alloc(cls) };
-    }
-
-    template<typename... Args>
-    unique_ptr make_unique(class_id cls, selector sel, Args... args) {
-        return unique_ptr { alloc(cls,sel,std::forward<Args>(args)...) };
-    }
-
-    //--------------------------------------------------------------------------
-
-    inline
-    shared_ptr make_shared(class_id cls) {
-        return shared_ptr { alloc(cls), CFRelease };
-    }
-
-    template<typename... Args>
-    shared_ptr make_shared(class_id cls, selector sel, Args... args) {
-        return shared_ptr {
-            alloc(cls,sel,std::forward<Args>(args)...),
-            CFRelease
-        };
-    }
-
-    //--------------------------------------------------------------------------
-
-    struct autoreleasepool : private unique_ptr {
-        autoreleasepool(): unique_ptr(alloc("NSAutoreleasePool")) {}
-    };
-
-    //--------------------------------------------------------------------------
-
     struct CGPoint { CGFloat x,y; };
     struct CGSize  { CGFloat width,height; };
     struct CGRect  { CGPoint origin; CGSize size; };
@@ -436,6 +380,14 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     struct NSObject {
+
+        void* operator new(size_t)             = delete;
+        void  operator delete(void* p)         { ((NSObject*)p)->release(); }
+        NSObject()                             = delete;
+        NSObject(NSObject&&)                   = delete;
+        NSObject(const NSObject&)              = delete;
+        NSObject& operator = (NSObject&&)      = delete;
+        NSObject& operator = (const NSObject&) = delete;
 
         static struct {
 
@@ -460,13 +412,6 @@ namespace OBJC_NAMESPACE {
             retain {"retain"};
 
         } api;
-
-        NSObject()                             = delete;
-        NSObject(NSObject&&)                   = delete;
-        NSObject(const NSObject&)              = delete;
-        NSObject& operator = (NSObject&&)      = delete;
-        NSObject& operator = (const NSObject&) = delete;
-       ~NSObject()                             = delete;
 
     protected:
 
@@ -502,6 +447,36 @@ namespace OBJC_NAMESPACE {
     };
 
     decltype(NSObject::api) NSObject::api {};
+
+    //--------------------------------------------------------------------------
+
+    struct NSAutoreleasePool : NSObject {
+
+        static struct {
+
+            class_id cls {"NSAutoreleasePool"};
+
+        } api;
+
+        static
+        NSAutoreleasePool*
+        alloc() { return NSObject::alloc<NSAutoreleasePool>(); }
+
+        NSAutoreleasePool*
+        init() { return NSObject::init<NSAutoreleasePool>(); }
+
+    };
+
+    decltype(NSAutoreleasePool::api) NSAutoreleasePool::api {};
+
+    //--------------------------------------------------------------------------
+
+    struct autoreleasepool {
+        NSAutoreleasePool* const pool = NSAutoreleasePool::alloc()->init();
+        autoreleasepool() = default;
+        autoreleasepool(decltype(nullptr)) : pool(nullptr) {}
+       ~autoreleasepool() { delete pool; new(this) autoreleasepool(nullptr); }
+    };
 
 } // namespace OBJC_NAMESPACE
 

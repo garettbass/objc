@@ -463,7 +463,8 @@ namespace OBJC_NAMESPACE {
 
     };
 
-    NSObject::API NSObject::api {};
+    NSObject::API
+    NSObject::api {};
 
     //--------------------------------------------------------------------------
 
@@ -484,7 +485,8 @@ namespace OBJC_NAMESPACE {
 
     };
 
-    NSAutoreleasePool::API NSAutoreleasePool::api {};
+    NSAutoreleasePool::API
+    NSAutoreleasePool::api {};
 
     //--------------------------------------------------------------------------
 
@@ -497,7 +499,7 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    template<typename = NSObject>
+    template<typename ObjectType = NSObject>
     struct NSArray;
 
     template<>
@@ -507,7 +509,7 @@ namespace OBJC_NAMESPACE {
 
             class_id cls {"NSArray"};
 
-            message<NSArray*(NSObject**,NSUInteger)>
+            message<NSArray*(NSObject*const*,NSUInteger)>
             arrayWithObjects_count {"arrayWithObjects:count:"};
 
             message<NSUInteger()>
@@ -518,18 +520,18 @@ namespace OBJC_NAMESPACE {
 
         } api;
 
-        template<typename... ObjectTypes>
         static
         NSArray*
-        array(ObjectTypes... objects) {
-            enum : NSUInteger { count = sizeof...(ObjectTypes) };
-            NSObject* array[count] { objects... };
-            return api.arrayWithObjects_count(api.cls,array,count);
+        array(std::initializer_list<NSObject*> objects) {
+            return api.arrayWithObjects_count(
+                api.cls,objects.begin(),objects.size()
+            );
         }
 
         NSUInteger count() const { return api.count(this); }
 
-        NSObject* objectAtIndex(NSUInteger index) const {
+        NSObject*
+        object(NSUInteger index) const {
             return api.objectAtIndex(this,index);
         }
 
@@ -538,22 +540,95 @@ namespace OBJC_NAMESPACE {
     template<typename ObjectType>
     struct NSArray : NSArray<NSObject> {
 
-        template<typename... ObjectTypes>
         static
         NSArray*
-        array(ObjectTypes... objects) {
-            enum : NSUInteger { count = sizeof...(ObjectTypes) };
-            ObjectType* array[count] { objects... };
-            return api.arrayWithObjects_count(api.cls,array,count);
+        array(std::initializer_list<ObjectType*> objects) {
+            return (NSArray*)api.arrayWithObjects_count(
+                api.cls,objects.begin(),objects.size()
+            );
         }
 
-        ObjectType* objectAtIndex(NSUInteger index) const {
+        ObjectType*
+        object(NSUInteger index) const {
             return (ObjectType*)api.objectAtIndex(this,index);
         }
 
     };
 
-    NSArray<NSObject>::API NSArray<NSObject>::api {};
+    NSArray<NSObject>::API
+    NSArray<NSObject>::api {};
+
+    //--------------------------------------------------------------------------
+
+    template<typename KeyType = NSObject, typename ObjectType = NSObject>
+    struct NSDictionary;
+
+    template<>
+    struct NSDictionary<NSObject,NSObject> : NSObject {
+
+        static struct API {
+
+            class_id cls {"NSDictionary"};
+
+            message<NSDictionary*(NSObject*const*,NSObject*const*,NSUInteger)>
+            dictionaryWithObjects_forKeys_count
+            {"dictionaryWithObjects:forKeys:count:"};
+
+            message<NSUInteger()>
+            count {"count"};
+
+            message<NSObject*(NSObject*)>
+            objectForKey {"objectForKey:"};
+
+        } api;
+
+        static
+        NSDictionary*
+        dictionary(
+            std::initializer_list<NSObject*> objects,
+            std::initializer_list<NSObject*> keys
+        ) {
+            assert(objects.size() == keys.size());
+            return api.dictionaryWithObjects_forKeys_count(
+                api.cls,objects.begin(),keys.begin(),
+                std::min(objects.size(),keys.size())
+            );
+        }
+
+        NSUInteger count() const { return api.count(this); }
+
+        NSObject*
+        object(NSObject* key) const {
+            return api.objectForKey(this,key);
+        }
+
+    };
+
+    template<typename KeyType, typename ObjectType>
+    struct NSDictionary : NSDictionary<NSObject,NSObject> {
+
+        static
+        NSDictionary*
+        dictionary(
+            std::initializer_list<ObjectType*> objects,
+            std::initializer_list<KeyType*>    keys
+        ) {
+            assert(objects.size() == keys.size());
+            return (NSDictionary*)api.dictionaryWithObjects_forKeys_count(
+                api.cls,objects.begin(),keys.begin(),
+                std::min(objects.size(),keys.size())
+            );
+        }
+
+        ObjectType*
+        object(NSObject* key) const {
+            return (ObjectType*)api.objectForKey(this,key);
+        }
+
+    };
+
+    NSDictionary<NSObject,NSObject>::API
+    NSDictionary<NSObject,NSObject>::api {};
 
     //--------------------------------------------------------------------------
 
@@ -577,14 +652,84 @@ namespace OBJC_NAMESPACE {
             return api.stringWithUTF8String(api.cls,utf8String);
         }
 
-        const char*
-        UTF8String() const {
-            return api.UTF8String(this);
+        const char* UTF8String() const { return api.UTF8String(this); }
+
+    };
+
+    NSString::API
+    NSString::api {};
+
+    //--------------------------------------------------------------------------
+
+    struct NSError : NSObject {
+
+        using UserInfo = NSDictionary<NSString,NSObject>;
+
+        static struct API {
+
+            class_id cls {"NSError"};
+
+            message<NSError*(NSString*,NSInteger,UserInfo*)>
+            errorWithDomain_code_userInfo
+            {"errorWithDomain:code:userInfo:"};
+
+            message<NSInteger()>
+            code {"code"};
+
+            message<NSString*()>
+            domain {"domain"};
+
+            message<UserInfo*()>
+            userInfo {"userInfo"};
+
+            message<NSString*()>
+            localizedDescription {"localizedDescription"};
+
+            message<NSString*()>
+            localizedRecoveryOptions {"localizedRecoveryOptions"};
+
+            message<NSString*()>
+            localizedRecoverySuggestion {"localizedRecoverySuggestion"};
+
+            message<NSString*()>
+            localizedFailureReason {"localizedFailureReason"};
+
+        } api;
+
+        static
+        NSError*
+        error(NSString* domain, NSInteger code, UserInfo* userInfo) {
+            return api.errorWithDomain_code_userInfo(
+                api.cls,domain,code,userInfo
+            );
+        }
+
+        NSInteger code() const { return api.code(this); }
+
+        NSString* domain() const { return api.domain(this); }
+
+        UserInfo* userInfo() const { return api.userInfo(this); }
+
+        NSString* localizedDescription() const {
+            return api.localizedDescription(this);
+        }
+
+        NSString* localizedRecoveryOptions() const {
+            return api.localizedRecoveryOptions(this);
+        }
+
+        NSString* localizedRecoverySuggestion() const {
+            return api.localizedRecoverySuggestion(this);
+        }
+
+        NSString* localizedFailureReason() const {
+            return api.localizedFailureReason(this);
         }
 
     };
 
-    NSString::API NSString::api {};
+    NSError::API
+    NSError::api {};
 
 } // namespace OBJC_NAMESPACE
 

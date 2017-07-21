@@ -66,9 +66,6 @@
     // warning C4201: nonstandard extension used: nameless struct/union
     #pragma warning(disable:4201)
 
-    // ISO 646 Alternative operator spellings
-    #include <ciso646>
-
 #else
 
     #error "unrecognized compiler"

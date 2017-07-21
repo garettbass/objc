@@ -4,6 +4,7 @@
 #if OBJC_OS_APPLE
 
 #include <cassert>
+#include <ciso646>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>

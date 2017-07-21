@@ -411,6 +411,9 @@ namespace OBJC_NAMESPACE {
             message<NSObject*()>
             retain {"retain"};
 
+            message<bool(Class)>
+            isKindOfClass {"isKindOfClass:"};
+
         } api;
 
     protected:
@@ -428,14 +431,27 @@ namespace OBJC_NAMESPACE {
 
     public:
 
+        template<typename ObjectType>
+        ObjectType*
+        as() { return is<ObjectType>() ? (ObjectType*)this : nullptr; }
+
         NSObject*
-        retain() { return api.retain(this); }
+        autorelease() { return api.autorelease(this); }
+
+        template<typename ObjectType>
+        bool
+        is() const { return isKindOfClass(ObjectType::api.cls); }
+
+        bool
+        isKindOfClass(class_id cls) const {
+            return api.isKindOfClass(this,cls);
+        }
 
         void
         release() { api.release(this); }
 
         NSObject*
-        autorelease() { return api.autorelease(this); }
+        retain() { return api.retain(this); }
 
     };
 

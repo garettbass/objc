@@ -488,6 +488,76 @@ namespace OBJC_NAMESPACE {
        ~autoreleasepool() { delete pool; new(this) autoreleasepool(nullptr); }
     };
 
+    //--------------------------------------------------------------------------
+
+    template<typename = NSObject>
+    struct NSArray;
+
+    template<>
+    struct NSArray<NSObject> : NSObject {
+
+        static struct API {
+
+            class_id cls {"NSArray"};
+
+            message<NSUInteger()>
+            count {"count"};
+
+            message<NSObject*(NSUInteger)>
+            objectAtIndex {"objectAtIndex:"};
+
+        } api;
+
+        NSUInteger count() const { return api.count(this); }
+
+        NSObject* objectAtIndex(NSUInteger index) const {
+            return api.objectAtIndex(this,index);
+        }
+
+    };
+
+    template<typename ObjectType>
+    struct NSArray : NSArray<NSObject> {
+
+        ObjectType* objectAtIndex(NSUInteger index) const {
+            return (ObjectType*)api.objectAtIndex(this,index);
+        }
+
+    };
+
+    NSArray<NSObject>::API NSArray<NSObject>::api {};
+
+    //--------------------------------------------------------------------------
+
+    struct NSString : NSObject {
+
+        static struct API {
+
+            class_id cls {"NSString"};
+
+            message<NSString*(const char*)>
+            stringWithUTF8String {"stringWithUTF8String:"};
+
+            message<const char*()>
+            UTF8String {"UTF8String"};
+
+        } api;
+
+        static
+        NSString*
+        string(const char* utf8String) {
+            return api.stringWithUTF8String(api.cls,utf8String);
+        }
+
+        const char*
+        UTF8String() const {
+            return api.UTF8String(this);
+        }
+
+    };
+
+    NSString::API NSString::api {};
+
 } // namespace OBJC_NAMESPACE
 
 #endif // OBJC_OS_APPLE

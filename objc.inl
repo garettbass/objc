@@ -432,6 +432,13 @@ namespace OBJC_NAMESPACE {
 
     public:
 
+        static
+        NSObject*
+        alloc() { return NSObject::alloc<NSObject>(); }
+
+        NSObject*
+        init() { return NSObject::init<NSObject>(); }
+
         template<typename ObjectType>
         ObjectType*
         as() { return is<ObjectType>() ? (ObjectType*)this : nullptr; }
@@ -500,6 +507,9 @@ namespace OBJC_NAMESPACE {
 
             class_id cls {"NSArray"};
 
+            message<NSArray*(NSObject**,NSUInteger)>
+            arrayWithObjects_count {"arrayWithObjects:count:"};
+
             message<NSUInteger()>
             count {"count"};
 
@@ -507,6 +517,15 @@ namespace OBJC_NAMESPACE {
             objectAtIndex {"objectAtIndex:"};
 
         } api;
+
+        template<typename... ObjectTypes>
+        static
+        NSArray*
+        array(ObjectTypes... objects) {
+            enum : NSUInteger { count = sizeof...(ObjectTypes) };
+            NSObject* array[count] { objects... };
+            return api.arrayWithObjects_count(api.cls,array,count);
+        }
 
         NSUInteger count() const { return api.count(this); }
 
@@ -518,6 +537,15 @@ namespace OBJC_NAMESPACE {
 
     template<typename ObjectType>
     struct NSArray : NSArray<NSObject> {
+
+        template<typename... ObjectTypes>
+        static
+        NSArray*
+        array(ObjectTypes... objects) {
+            enum : NSUInteger { count = sizeof...(ObjectTypes) };
+            ObjectType* array[count] { objects... };
+            return api.arrayWithObjects_count(api.cls,array,count);
+        }
 
         ObjectType* objectAtIndex(NSUInteger index) const {
             return (ObjectType*)api.objectAtIndex(this,index);

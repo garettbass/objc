@@ -389,7 +389,7 @@ namespace OBJC_NAMESPACE {
         NSObject& operator = (NSObject&&)      = delete;
         NSObject& operator = (const NSObject&) = delete;
 
-        static struct {
+        static struct API {
 
             class_id cls {"NSObject"};
 
@@ -428,13 +428,6 @@ namespace OBJC_NAMESPACE {
 
     public:
 
-        static
-        NSObject*
-        alloc() { return alloc<NSObject>(); }
-
-        NSObject*
-        init() { return init<NSObject>(); }
-
         NSObject*
         retain() { return api.retain(this); }
 
@@ -446,13 +439,13 @@ namespace OBJC_NAMESPACE {
 
     };
 
-    decltype(NSObject::api) NSObject::api {};
+    NSObject::API NSObject::api {};
 
     //--------------------------------------------------------------------------
 
     struct NSAutoreleasePool : NSObject {
 
-        static struct {
+        static struct API {
 
             class_id cls {"NSAutoreleasePool"};
 
@@ -467,7 +460,7 @@ namespace OBJC_NAMESPACE {
 
     };
 
-    decltype(NSAutoreleasePool::api) NSAutoreleasePool::api {};
+    NSAutoreleasePool::API NSAutoreleasePool::api {};
 
     //--------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@ set -e
 testdir="$(cd "$(dirname "$0")" && pwd)"
 testrun="$testdir/testrun"
 
-CXX="clang++ -std=c++11 -Wall"
+CXX="c++ -std=c++11 -Wall"
 # FRAMEWORKS="-framework CoreFoundation -framework Foundation -framework Cocoa"
 
 rm -f "$testrun"

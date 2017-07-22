@@ -311,12 +311,12 @@ namespace OBJC_NAMESPACE {
         : sel(sel), imp(imp_t(class_getMethodImplementation(cls,sel))) {}
 
         Result operator ()(object obj, Args... args) const {
-            return imp(obj,sel,std::forward<Args>(args)...);
+            return imp(obj,sel,args...);
         }
 
         template<typename Self>
         Result operator ()(Self* obj, Args... args) const {
-            return imp(id_t(obj),sel,std::forward<Args>(args)...);
+            return imp(id_t(obj),sel,args...);
         }
     };
 
@@ -335,16 +335,16 @@ namespace OBJC_NAMESPACE {
         : sel(sel) {}
 
         Result operator ()(object obj, Args... args) const {
-            return send(id_t(obj),sel,std::forward<Args>(args)...);
+            return send(id_t(obj),sel,args...);
         }
 
         Result operator ()(super sup, Args... args) const {
-            return send((super_t&)(sup),sel,std::forward<Args>(args)...);
+            return send((super_t&)(sup),sel,args...);
         }
 
         template<typename Self>
         Result operator ()(Self* obj, Args... args) const {
-            return send(id_t(obj),sel,std::forward<Args>(args)...);
+            return send(id_t(obj),sel,args...);
         }
 
         using message_base<Result(Args...)>::send;
@@ -363,7 +363,7 @@ namespace OBJC_NAMESPACE {
     id alloc(class_id cls, selector sel, Args... args) {
         message<id()> alloc { "alloc" };
         message<id(Args...)> init { sel };
-        return init(alloc(cls),std::forward<Args>(args)...);
+        return init(alloc(cls),args...);
     }
 
     //--------------------------------------------------------------------------

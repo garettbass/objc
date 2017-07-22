@@ -216,7 +216,6 @@
     #define OBJC_ENDIAN_BE     0
     #define OBJC_ENDIAN        OBJC_ENDIAN_LE
     #define OBJC_ENDIAN_NAME   "little endian"
-    static_assert(0x31323334 == '1234', "byte order mismatch");
 
 #elif OBJC_CPU_PPC
 
@@ -224,7 +223,6 @@
     #define OBJC_ENDIAN_BE     0x04030201u
     #define OBJC_ENDIAN        OBJC_ENDIAN_BE
     #define OBJC_ENDIAN_NAME   "big endian"
-    static_assert(0x34333231 == '1234', "byte order mismatch");
 
 #else
 

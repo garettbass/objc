@@ -1,14 +1,15 @@
-#define DOCTEST_CONFIG_IMPLEMENT
-#include "doctest.hpp"
-
 #include <algorithm>
 #include <string>
 #include "../objc.inl"
 
+#define DOCTEST_CONFIG_IMPLEMENT
+#include "doctest.hpp"
+using namespace doctest;
+
+#if OBJC_OS_APPLE
+
 using objc::id;
 using objc::SEL;
-
-using namespace doctest;
 
 TEST_CASE("objc::class_id") {
     objc::class_id NSObject { "NSObject" };
@@ -66,8 +67,12 @@ TEST_CASE("objc::retain/release") {
     REQUIRE(deallocated);
 }
 
+#endif // OBJC_OS_APPLE
+
 int main(int argc, char * argv[]) {
+    #if OBJC_OS_APPLE
     objc::autoreleasepool autoreleasepool;
+    #endif // OBJC_OS_APPLE
     Context context { argc, argv };
     const int failures = context.run();
     return std::min(failures,255);

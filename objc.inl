@@ -733,4 +733,8 @@ namespace OBJC_NAMESPACE {
 
 } // namespace OBJC_NAMESPACE
 
+#else
+
+    #error "objc: unsupported platform"
+
 #endif // OBJC_OS_APPLE

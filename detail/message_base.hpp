@@ -1,10 +1,10 @@
 #pragma once
 
 template<typename Result, typename... Args>
-using send_self_t = Result(*)(id_t,sel_t,Args...);
+using send_self_t = Result(*)(objc_object*,SEL,Args...);
 
 template<typename Result, typename... Args>
-using send_super_t = Result(*)(super_t*,sel_t,Args...);
+using send_objc_super = Result(*)(objc_super*,SEL,Args...);
 
 //------------------------------------------------------------------------------
 
@@ -13,20 +13,20 @@ struct message_float_result;
 
 template<typename Result, typename... Args>
 struct message_float_result<Result(Args...)> {
-    static Result send(id_t obj, selector sel, Args... args) {
+    static Result send(objc_object* obj, selector sel, Args... args) {
         return send_self_t<Result,Args...>(objc_msgSend_fpret)(
             obj,sel,args...
         );
     }
 
-    static Result send(super_t* sup, selector sel, Args... args) {
-        return send_super_t<Result,Args...>(objc_msgSendSuper)(
+    static Result send(objc_super* sup, selector sel, Args... args) {
+        return send_objc_super<Result,Args...>(objc_msgSendSuper)(
             sup,sel,args...
         );
     }
 
-    static Result send(super_t& sup, selector sel, Args... args) {
-        return send_super_t<Result,Args...>(objc_msgSendSuper)(
+    static Result send(objc_super& sup, selector sel, Args... args) {
+        return send_objc_super<Result,Args...>(objc_msgSendSuper)(
             &sup,sel,args...
         );
     }
@@ -39,20 +39,20 @@ struct message_large_result;
 
 template<typename Result, typename... Args>
 struct message_large_result<Result(Args...)> {
-    static Result send(id_t obj, selector sel, Args... args) {
+    static Result send(objc_object* obj, selector sel, Args... args) {
         return send_self_t<Result,Args...>(objc_msgSend_stret)(
             obj,sel,args...
         );
     }
 
-    static Result send(super_t* sup, selector sel, Args... args) {
-        return send_super_t<Result,Args...>(objc_msgSendSuper_stret)(
+    static Result send(objc_super* sup, selector sel, Args... args) {
+        return send_objc_super<Result,Args...>(objc_msgSendSuper_stret)(
             sup,sel,args...
         );
     }
 
-    static Result send(super_t& sup, selector sel, Args... args) {
-        return send_super_t<Result,Args...>(objc_msgSendSuper_stret)(
+    static Result send(objc_super& sup, selector sel, Args... args) {
+        return send_objc_super<Result,Args...>(objc_msgSendSuper_stret)(
             &sup,sel,args...
         );
     }
@@ -65,20 +65,20 @@ struct message_small_result;
 
 template<typename Result, typename... Args>
 struct message_small_result<Result(Args...)> {
-    static Result send(id_t obj, selector sel, Args... args) {
+    static Result send(objc_object* obj, selector sel, Args... args) {
         return send_self_t<Result,Args...>(objc_msgSend)(
             obj,sel,args...
         );
     }
 
-    static Result send(super_t* sup, selector sel, Args... args) {
-        return send_super_t<Result,Args...>(objc_msgSendSuper)(
+    static Result send(objc_super* sup, selector sel, Args... args) {
+        return send_objc_super<Result,Args...>(objc_msgSendSuper)(
             sup,sel,args...
         );
     }
 
-    static Result send(super_t& sup, selector sel, Args... args) {
-        return send_super_t<Result,Args...>(objc_msgSendSuper)(
+    static Result send(objc_super& sup, selector sel, Args... args) {
+        return send_objc_super<Result,Args...>(objc_msgSendSuper)(
             &sup,sel,args...
         );
     }

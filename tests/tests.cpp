@@ -11,8 +11,8 @@ using namespace doctest;
 using objc::id;
 using objc::SEL;
 
-TEST_CASE("objc::class_id") {
-    objc::class_id NSObject { "NSObject" };
+TEST_CASE("objc::classid") {
+    objc::classid NSObject { "NSObject" };
     REQUIRE(NSObject.cls != nullptr);
     REQUIRE(NSObject.name() == std::string("NSObject"));
 }
@@ -24,8 +24,8 @@ TEST_CASE("objc::selector") {
 }
 
 TEST_CASE("objc::super") {
-    objc::class_id NSObject { "NSObject" };
-    objc::class_id TestClass1 { "TestClass1",NSObject };
+    objc::classid NSObject { "NSObject" };
+    objc::classid TestClass1 { "TestClass1",NSObject };
     REQUIRE(TestClass1.cls != nullptr);
     REQUIRE(TestClass1.name() == std::string("TestClass1"));
     auto obj = objc::alloc(TestClass1);
@@ -37,7 +37,7 @@ TEST_CASE("objc::retain/release") {
     static bool initialized = false;
     static bool deallocated = false;
 
-    objc::class_id TestClass2 {
+    objc::classid TestClass2 {
         "TestClass2","NSObject",
         objc::method("init",[](id self,SEL sel){
             self = objc::message<id()>{sel}(objc::super(self));
@@ -55,15 +55,15 @@ TEST_CASE("objc::retain/release") {
     objc::object obj = alloc(TestClass2);
     REQUIRE(initialized);
     REQUIRE(not deallocated);
-    REQUIRE(get_retain_count(obj) == 1);
+    REQUIRE(objc::CFGetRetainCount(obj) == 1);
 
-    objc::retain(obj);
-    REQUIRE(get_retain_count(obj) == 2);
+    objc::CFRetain(obj);
+    REQUIRE(objc::CFGetRetainCount(obj) == 2);
 
-    objc::release(obj);
-    REQUIRE(get_retain_count(obj) == 1);
+    objc::CFRelease(obj);
+    REQUIRE(objc::CFGetRetainCount(obj) == 1);
 
-    objc::release(obj);
+    objc::CFRelease(obj);
     REQUIRE(deallocated);
 }
 

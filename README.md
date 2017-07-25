@@ -89,7 +89,7 @@ objc::shared_ptr sharedDelegatePtr = objc::make_shared(AppDelegate);
 
 ``` C++
 // do some serious initialization
-objc::class_id NSWindow { "NSWindow" };
+objc::classid NSWindow { "NSWindow" };
 
 struct NSPoint { double x, y; };
 struct NSSize { double width, height; };

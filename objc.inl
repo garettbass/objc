@@ -32,88 +32,18 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    using class_t = Class;
-
-    using id_t = id;
-
-    using imp_t = IMP;
-
-    using ivar_t = Ivar;
-
-    using object_t = objc_object;
-
-    using protocol_t = Protocol;
-
-    using sel_t = SEL;
-
-    using super_t = objc_super;
-
-    //--------------------------------------------------------------------------
-
-    struct object {
-        id_t const id = nullptr;
-
-        object(decltype(nullptr)): id(nullptr) {}
-
-        object(id_t obj): id(obj) {}
-
-        object(const struct class_id& cls): id((id_t&)(cls)) {}
-
-        explicit object(void* obj): id(id_t(obj)) {}
-
-        explicit object(uintptr_t obj): id(id_t(obj)) {}
-
-        explicit operator bool() const { return id != nullptr; }
-
-        explicit operator size_t() const { return size_t(id); }
-
-        operator id_t() const { return id; }
-
-        bool operator ==(const object& o) const { return id == o.id; }
-        bool operator !=(const object& o) const { return id != o.id; }
-    };
-
-    //--------------------------------------------------------------------------
-
-    struct protocol {
-        protocol_t* const proto = nullptr;
-
-        protocol(decltype(nullptr)): proto(nullptr) {}
-
-        protocol(protocol_t* const proto)
-        : proto(proto)
-        {}
-
-        protocol(const char* name)
-        : proto(objc_getProtocol(name))
-        {}
-
-        explicit operator bool() const { return proto != nullptr; }
-
-        operator protocol_t*() const { return proto; }
-
-        bool operator ==(const protocol& p) const { return proto == p.proto; }
-        bool operator !=(const protocol& p) const { return proto != p.proto; }
-
-        const char* name() const {
-            return proto ? protocol_getName(proto): nullptr;
-        }
-    };
-
-    //--------------------------------------------------------------------------
-
     struct selector {
-        sel_t const sel = nullptr;
+        SEL const sel = nullptr;
 
         selector(decltype(nullptr)): sel(nullptr) {}
 
-        selector(sel_t sel): sel(sel) {}
+        selector(SEL sel): sel(sel) {}
 
         selector(const char* name): sel(sel_getUid(name)) {}
 
         explicit operator bool() const { return sel != nullptr; }
 
-        operator sel_t() const { return sel; }
+        operator SEL() const { return sel; }
 
         bool operator ==(const selector& s) const { return sel == s.sel; }
         bool operator !=(const selector& s) const { return sel != s.sel; }
@@ -123,9 +53,32 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    struct super : super_t {
-        super(id_t self, class_t super)
-        : super_t{self,super} {}
+    struct object {
+        objc_object* const id = nullptr;
+
+        object(decltype(nullptr)): id(nullptr) {}
+
+        object(objc_object* obj): id(obj) {}
+
+        object(const struct classid& cls): id((objc_object*&)(cls)) {}
+
+        explicit object(void* obj): id((objc_object*)obj) {}
+
+        explicit operator bool() const { return id != nullptr; }
+
+        explicit operator size_t() const { return size_t(id); }
+
+        operator objc_object*() const { return id; }
+
+        bool operator ==(const object& o) const { return id == o.id; }
+        bool operator !=(const object& o) const { return id != o.id; }
+    };
+
+    //--------------------------------------------------------------------------
+
+    struct super : objc_super {
+        super(objc_object* self, objc_class* super)
+        : objc_super{self,super} {}
 
         explicit
         super(object obj)
@@ -133,7 +86,7 @@ namespace OBJC_NAMESPACE {
 
         explicit operator bool() const { return super_class != nullptr; }
 
-        operator super_t*() { return this; }
+        operator objc_super*() { return this; }
     };
 
     //--------------------------------------------------------------------------
@@ -149,15 +102,15 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     struct method {
-        sel_t const sel = nullptr;
-        imp_t const imp = nullptr;
+        SEL const sel = nullptr;
+        IMP const imp = nullptr;
 
-        method(selector sel, imp_t imp)
+        method(selector sel, IMP imp)
         : sel(sel), imp(imp) {}
 
         template<typename Callback>
         method(selector sel, Callback&& callback)
-        : method(sel, imp_t(function_cast(callback))) {
+        : method(sel, IMP(function_cast(callback))) {
             using arg0_t = argument_type<Callback,0>;
             static_assert(
                 std::is_same<arg0_t,object>::value or
@@ -175,20 +128,20 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    struct class_id {
-        class_t const cls = nullptr;
+    struct classid {
+        objc_class* const cls = nullptr;
 
-        class_id(decltype(nullptr)): cls(nullptr) {}
+        classid(decltype(nullptr)): cls(nullptr) {}
 
-        class_id(class_t cls): cls(cls) {}
+        classid(objc_class* cls): cls(cls) {}
 
-        class_id(const char* name): cls(objc_getClass(name)) {}
+        classid(const char* name): cls(objc_getClass(name)) {}
 
-        class_id(id_t obj): cls(object_getClass(obj)) {}
+        classid(objc_object* obj): cls(object_getClass(obj)) {}
 
         template<typename... Defs>
-        class_id(const char* name, class_id super, Defs&&... defs)
-        : class_id(objc_allocateClassPair(super,name,0)) {
+        classid(const char* name, classid super, Defs&&... defs)
+        : classid(objc_allocateClassPair(super,name,0)) {
             assert(cls||!"failed to allocate class");
             struct local { static void unpack(...) {} };
             local::unpack(((define(super,defs)),'\0')...);
@@ -197,31 +150,25 @@ namespace OBJC_NAMESPACE {
 
         explicit operator bool() const { return cls != nullptr; }
 
-        operator class_t() { return cls; }
+        operator objc_class*() { return cls; }
 
-        bool operator ==(const class_id& c) const { return cls == c.cls; }
-        bool operator !=(const class_id& c) const { return cls != c.cls; }
+        bool operator ==(const classid& c) const { return cls == c.cls; }
+        bool operator !=(const classid& c) const { return cls != c.cls; }
 
         const char* name() const { return cls ? class_getName(cls) : nullptr; }
 
     private:
 
         template<typename T>
-        void define(class_id super, const variable<T>& v) {
+        void define(classid super, const variable<T>& v) {
             if (not class_addIvar(cls,v.name,sizeof(T),0,"?")) {
                 assert(!"failed to add variable");
             }
         }
 
-        void define(class_id super, const method& m) {
+        void define(classid super, const method& m) {
             if (not class_addMethod(cls,m.sel,m.imp,"@:")) {
                 assert(!"failed to add method");
-            }
-        }
-
-        void define(class_id super, const protocol& p) {
-            if (not class_addProtocol(cls,p)) {
-                assert(!"failed to add protocol");
             }
         }
     };
@@ -229,30 +176,19 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     inline
-    class_id classof(id_t obj) { return { obj }; }
+    classid classof(objc_object* obj) { return { obj }; }
 
     inline
-    class_id classof(super super) { return { super.super_class }; }
-
-    //--------------------------------------------------------------------------
-
-    inline
-    long get_retain_count(object obj) { return CFGetRetainCount(obj); }
-
-    inline
-    void retain(object obj) { CFRetain(obj); }
-
-    inline
-    void release(object obj) { CFRelease(obj); }
+    classid classof(super super) { return { super.super_class }; }
 
     //--------------------------------------------------------------------------
 
     template<typename T>
     struct accessor {
-        ivar_t const ivar   = nullptr;
+        Ivar   const ivar   = nullptr;
         size_t const offset = 0;
 
-        accessor(class_id cls, const char* name)
+        accessor(classid cls, const char* name)
         : ivar(class_getInstanceVariable(cls,name))
         , offset(ivar ? ivar_getOffset(ivar): 0) {}
 
@@ -302,13 +238,13 @@ namespace OBJC_NAMESPACE {
 
     template<typename Result, typename... Args>
     struct implementation<Result(Args...)> {
-        using imp_t = Result(*)(id,sel_t,Args...);
+        using IMP = Result(*)(id,SEL,Args...);
 
-        sel_t const sel = nullptr;
-        imp_t const imp = nullptr;
+        SEL const sel = nullptr;
+        IMP const imp = nullptr;
 
-        implementation(class_id cls, selector sel)
-        : sel(sel), imp(imp_t(class_getMethodImplementation(cls,sel))) {}
+        implementation(classid cls, selector sel)
+        : sel(sel), imp(IMP(class_getMethodImplementation(cls,sel))) {}
 
         Result operator ()(object obj, Args... args) const {
             return imp(obj,sel,args...);
@@ -316,7 +252,7 @@ namespace OBJC_NAMESPACE {
 
         template<typename Self>
         Result operator ()(Self* obj, Args... args) const {
-            return imp(id_t(obj),sel,args...);
+            return imp((objc_object*)obj,sel,args...);
         }
     };
 
@@ -329,22 +265,22 @@ namespace OBJC_NAMESPACE {
 
     template<typename Result, typename... Args>
     struct message<Result(Args...)> : message_base<Result(Args...)> {
-        sel_t const sel = nullptr;
+        SEL const sel = nullptr;
 
         message(selector sel)
         : sel(sel) {}
 
         Result operator ()(object obj, Args... args) const {
-            return send(id_t(obj),sel,args...);
+            return send((objc_object*)obj,sel,args...);
         }
 
         Result operator ()(super sup, Args... args) const {
-            return send((super_t&)(sup),sel,args...);
+            return send((objc_super&)(sup),sel,args...);
         }
 
         template<typename Self>
         Result operator ()(Self* obj, Args... args) const {
-            return send(id_t(obj),sel,args...);
+            return send((objc_object*)obj,sel,args...);
         }
 
         using message_base<Result(Args...)>::send;
@@ -353,14 +289,14 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     inline
-    id alloc(class_id cls) {
+    id alloc(classid cls) {
         message<id()> alloc { "alloc" };
         message<id()> init { "init" };
         return init(alloc(cls));
     }
 
     template<typename... Args>
-    id alloc(class_id cls, selector sel, Args... args) {
+    id alloc(classid cls, selector sel, Args... args) {
         message<id()> alloc { "alloc" };
         message<id(Args...)> init { sel };
         return init(alloc(cls),args...);
@@ -392,7 +328,7 @@ namespace OBJC_NAMESPACE {
 
         static struct API {
 
-            class_id cls {"NSObject"};
+            classid cls {"NSObject"};
 
             message<NSObject*()>
             alloc {"alloc"};
@@ -451,7 +387,7 @@ namespace OBJC_NAMESPACE {
         is() const { return isKindOfClass(ObjectType::api.cls); }
 
         bool
-        isKindOfClass(class_id cls) const {
+        isKindOfClass(classid cls) const {
             return api.isKindOfClass(this,cls);
         }
 
@@ -472,7 +408,7 @@ namespace OBJC_NAMESPACE {
 
         static struct API {
 
-            class_id cls {"NSAutoreleasePool"};
+            classid cls {"NSAutoreleasePool"};
 
         } api;
 
@@ -507,7 +443,7 @@ namespace OBJC_NAMESPACE {
 
         static struct API {
 
-            class_id cls {"NSArray"};
+            classid cls {"NSArray"};
 
             message<NSArray*(NSObject*const*,NSUInteger)>
             arrayWithObjects_count {"arrayWithObjects:count:"};
@@ -568,7 +504,7 @@ namespace OBJC_NAMESPACE {
 
         static struct API {
 
-            class_id cls {"NSDictionary"};
+            classid cls {"NSDictionary"};
 
             message<NSDictionary*(NSObject*const*,NSObject*const*,NSUInteger)>
             dictionaryWithObjects_forKeys_count
@@ -636,7 +572,7 @@ namespace OBJC_NAMESPACE {
 
         static struct API {
 
-            class_id cls {"NSString"};
+            classid cls {"NSString"};
 
             message<NSString*(const char*)>
             stringWithUTF8String {"stringWithUTF8String:"};
@@ -667,7 +603,7 @@ namespace OBJC_NAMESPACE {
 
         static struct API {
 
-            class_id cls {"NSError"};
+            classid cls {"NSError"};
 
             message<NSError*(NSString*,NSInteger,UserInfo*)>
             errorWithDomain_code_userInfo

@@ -5,4 +5,4 @@ osx_image: xcode8
 branches:
   only:
     - master
-script: ./tests/run
+script: sh /tests/run.sh

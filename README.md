@@ -36,7 +36,7 @@ NSWindow_setFrameOrigin(window,{0,0});
 ``` C++
 using namespace objc; // reduce verbosity!
 
-class_definition AppDelegate {
+classid AppDelegate {
     "AppDelegate", // class name
     "NSObject",    // superclass name
 
@@ -62,73 +62,4 @@ class_definition AppDelegate {
         std::cout << "application will terminate :( \n";
     }),
 };
-```
-
-## Instantiate Classes
-
-``` C++
-// [[AppDelegate alloc] init]
-id delegate = objc::alloc(AppDelegate);
-// do stuff ...
-objc::release(delegate);
-```
-
-``` C++
-id delegate = objc::alloc("AppDelegate"); // string is OK
-```
-
-``` C++
-// make a std::unique_ptr<id,objc::deleter>...
-objc::unique_ptr uniqueDelegatePtr = objc::make_unique(AppDelegate);
-```
-
-``` C++
-// make a std::shared_ptr<id,objc::deleter>...
-objc::shared_ptr sharedDelegatePtr = objc::make_shared(AppDelegate);
-```
-
-``` C++
-// do some serious initialization
-objc::classid NSWindow { "NSWindow" };
-
-struct NSPoint { double x, y; };
-struct NSSize { double width, height; };
-struct NSRect { NSPoint origin; NSSize size; };
-
-enum NSWindowStyleMask : unsigned long {
-    Borderless             = 0,
-    Titled                 = 1 << 0,
-    Closable               = 1 << 1,
-    Miniaturizable         = 1 << 2,
-    Resizable              = 1 << 3,
-    UtilityWindow          = 1 << 4,
-    DocModalWindow         = 1 << 6,
-    NonactivatingPanel     = 1 << 7,
-    TexturedBackground     = 1 << 8,
-    UnifiedTitleAndToolbar = 1 << 12,
-    HUDWindow              = 1 << 13,
-    FullScreen             = 1 << 14,
-    FullSizeContentView    = 1 << 15,
-}
-
-enum NSBackingStore : unsigned long {
-    Retained     = 0, // deprecated
-    Nonretained  = 1, // deprecated
-    Buffered     = 2,
-};
-
-// [[NSWindow alloc] initWithContentRect:...]
-id window = objc::alloc(
-    NSWindow,
-    "initWithContentRect:styleMask:backing:defer:",
-    NSRect{{0,0},{800,600}},
-    NSWindowStyleMask(
-        NSWindowStyleMask::Titled |
-        NSWindowStyleMask::Closable |
-        NSWindowStyleMask::Miniaturizable |
-        NSWindowStyleMask::Resizable
-    ),
-    NSBackingStore::Buffered,
-    true
-);
 ```

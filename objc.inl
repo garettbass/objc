@@ -114,7 +114,7 @@ namespace OBJC_NAMESPACE {
 
         template<typename Callback>
         method(selector sel, Callback&& callback)
-        : method(sel, IMP(function_cast(callback))) {
+        : method(sel, IMP(function_t<Callback>(callback))) {
             using first_parameter_t = parameter_t<0,Callback>;
             static_assert(
                 std::is_pointer<first_parameter_t>::value or

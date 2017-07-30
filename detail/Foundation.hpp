@@ -12,133 +12,132 @@ namespace OBJC_NAMESPACE {
 
     using Class    = objc_class*;
     using id       = objc_object*;
-    using IMP      = function_type<void*(objc_object*,objc_selector*)>;
+    using IMP      = function_t<void*(objc_object*,objc_selector*)>;
     using Ivar     = objc_ivar*;
     using Protocol = objc_object;
     using SEL      = objc_selector*;
 
-    function_type<bool(Class,const char*,size_t,uint8_t,const char*)>
+    function_t<bool(Class,const char*,size_t,uint8_t,const char*)>
     const class_addIvar {
-        Foundation.function("class_addIvar")
+        Foundation("class_addIvar")
     };
 
-    function_type<bool(Class,SEL,IMP,const char*)>
+    function_t<bool(Class,SEL,IMP,const char*)>
     const class_addMethod {
-        Foundation.function("class_addMethod")
+        Foundation("class_addMethod")
     };
 
-    function_type<bool(Class,Protocol*)>
+    function_t<bool(Class,Protocol*)>
     const class_addProtocol {
-        Foundation.function("class_addProtocol")
+        Foundation("class_addProtocol")
     };
 
-    function_type<Ivar(Class,const char*)>
+    function_t<Ivar(Class,const char*)>
     const class_getInstanceVariable {
-        Foundation.function("class_getInstanceVariable")
+        Foundation("class_getInstanceVariable")
     };
 
-    function_type<IMP(Class,SEL)>
+    function_t<IMP(Class,SEL)>
     const class_getMethodImplementation {
-        Foundation.function("class_getMethodImplementation")
+        Foundation("class_getMethodImplementation")
     };
 
-    function_type<const char*(Class cls)>
+    function_t<const char*(Class cls)>
     const class_getName {
-        Foundation.function("class_getName")
+        Foundation("class_getName")
     };
 
-    function_type<Class(Class cls)>
+    function_t<Class(Class cls)>
     const class_getSuperclass {
-        Foundation.function("class_getSuperclass")
+        Foundation("class_getSuperclass")
     };
 
-    function_type<ptrdiff_t(Ivar)>
+    function_t<ptrdiff_t(Ivar)>
     const ivar_getOffset {
-        Foundation.function("ivar_getOffset")
+        Foundation("ivar_getOffset")
     };
 
-    function_type<Class(Class,const char*,size_t)>
+    function_t<Class(Class,const char*,size_t)>
     const objc_allocateClassPair {
-        Foundation.function("objc_allocateClassPair")
+        Foundation("objc_allocateClassPair")
     };
 
-    function_type<Class(const char*)>
+    function_t<Class(const char*)>
     const objc_getClass {
-        Foundation.function("objc_getClass")
+        Foundation("objc_getClass")
     };
 
-    function_type<Protocol*(const char*)>
+    function_t<Protocol*(const char*)>
     const objc_getProtocol {
-        Foundation.function("objc_getProtocol")
+        Foundation("objc_getProtocol")
     };
 
-    function_type<id(id,SEL)>
+    function_t<id(id,SEL)>
     const objc_msgSend {
-        Foundation.function("objc_msgSend")
+        Foundation("objc_msgSend")
     };
 
-    function_type<id(objc_super*,SEL)>
+    function_t<id(objc_super*,SEL)>
     const objc_msgSendSuper {
-        Foundation.function("objc_msgSendSuper")
+        Foundation("objc_msgSendSuper")
     };
 
-
-    function_type<long double(id,SEL)>
+    function_t<long double(id,SEL)>
     const objc_msgSend_fpret {
-        #if OBJC_CPU_X86
-            Foundation.function("objc_msgSend_fpret")
-        #elif OBJC_CPU_ARM
-            Foundation.function("objc_msgSend")
+        #if CXX_CPU_X86
+            Foundation("objc_msgSend_fpret")
+        #elif CXX_CPU_ARM
+            Foundation("objc_msgSend")
         #else
             #error "objc_msgSend_fpret unresolved"
         #endif
     };
 
-    function_type<void(id,SEL)>
+    function_t<void(id,SEL)>
     const objc_msgSend_stret {
-        #if OBJC_CPU_X86
-            Foundation.function("objc_msgSend_stret")
-        #elif OBJC_CPU_ARM
-            Foundation.function("objc_msgSend")
+        #if CXX_CPU_X86
+            Foundation("objc_msgSend_stret")
+        #elif CXX_CPU_ARM
+            Foundation("objc_msgSend")
         #else
             #error "objc_msgSend_stret unresolved"
         #endif
     };
 
-    function_type<void(objc_super*,SEL)>
+    function_t<void(objc_super*,SEL)>
     const objc_msgSendSuper_stret {
-        #if OBJC_CPU_X86
-            Foundation.function("objc_msgSendSuper_stret")
-        #elif OBJC_CPU_ARM
-            Foundation.function("objc_msgSendSuper")
+        #if CXX_CPU_X86
+            Foundation("objc_msgSendSuper_stret")
+        #elif CXX_CPU_ARM
+            Foundation("objc_msgSendSuper")
         #else
             #error "objc_msgSendSuper_stret unresolved"
         #endif
     };
 
-    function_type<void(Class cls)>
+    function_t<void(Class cls)>
     const objc_registerClassPair {
-        Foundation.function("objc_registerClassPair")
+        Foundation("objc_registerClassPair")
     };
 
-    function_type<Class(id obj)>
+    function_t<Class(id obj)>
     const object_getClass {
-        Foundation.function("object_getClass")
+        Foundation("object_getClass")
     };
 
-    function_type<const char*(Protocol*)>
+    function_t<const char*(Protocol*)>
     const protocol_getName {
-        Foundation.function("protocol_getName")
+        Foundation("protocol_getName")
     };
 
-    function_type<const char*(SEL)>
+    function_t<const char*(SEL)>
     const sel_getName {
-        Foundation.function("sel_getName")
+        Foundation("sel_getName")
     };
 
-    function_type<SEL(const char*)>
+    function_t<SEL(const char*)>
     const sel_getUid {
-        Foundation.function("sel_getUid")
+        Foundation("sel_getUid")
     };
 
 } // namespace OBJC_NAMESPACE

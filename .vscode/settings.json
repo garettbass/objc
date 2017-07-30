@@ -12,6 +12,11 @@
         "new": "cpp",
         "stdexcept": "cpp",
         "typeinfo": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "__bit_reference": "cpp",
+        "__tree": "cpp",
+        "algorithm": "cpp",
+        "set": "cpp",
+        "string": "cpp"
     }
 }

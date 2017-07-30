@@ -1,20 +1,24 @@
 #pragma once
-
-#include "detail/platform.hpp"
-#if OBJC_OS_APPLE
-
 #include <cassert>
 #include <ciso646>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 
+#include "dll/cxx/push.h"
+#include "dll/cxx/cxx.h"
+#if CXX_OS_APPLE
+
 #ifndef OBJC_NAMESPACE
 #define OBJC_NAMESPACE objc
 #endif // OBJC_NAMESPACE
 
-#include "detail/function_traits.hpp"
-#include "detail/library.hpp"
+#define DLL_NAMESPACE OBJC_NAMESPACE
+#include "dll/dll.hpp"
+
+#define FUNCTION_TRAITS_NAMESPACE OBJC_NAMESPACE
+#include "function_traits/function_traits.hpp"
+
 #include "detail/CoreFoundation.hpp"
 #include "detail/Foundation.hpp"
 
@@ -111,17 +115,17 @@ namespace OBJC_NAMESPACE {
         template<typename Callback>
         method(selector sel, Callback&& callback)
         : method(sel, IMP(function_cast(callback))) {
-            using arg0_t = argument_type<Callback,0>;
+            using first_parameter_t = parameter_t<0,Callback>;
             static_assert(
-                std::is_same<arg0_t,object>::value or
-                std::is_pointer<arg0_t>::value,
-                "first argument must be of type 'id' or 'objc::object'"
+                std::is_pointer<first_parameter_t>::value or
+                std::is_same<first_parameter_t,object>::value,
+                "first parameter must be of type 'id' or 'objc::object'"
             );
-            using arg1_t = argument_type<Callback,1>;
+            using second_parameter_t = parameter_t<1,Callback>;
             static_assert(
-                std::is_same<arg1_t,SEL>::value or
-                std::is_same<arg1_t,selector>::value,
-                "second argument must be of type 'SEL' or 'objc::selector'"
+                std::is_same<second_parameter_t,SEL>::value or
+                std::is_same<second_parameter_t,selector>::value,
+                "second parameter must be of type 'SEL' or 'objc::selector'"
             );
         }
     };
@@ -673,4 +677,5 @@ namespace OBJC_NAMESPACE {
 
     #error "objc: unsupported platform"
 
-#endif // OBJC_OS_APPLE
+#endif // CXX_OS_APPLE
+#include "dll/cxx/pop.h"

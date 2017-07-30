@@ -1,0 +1,6 @@
+[submodule "dll"]
+	path = dll
+	url = https://github.com/garettbass/dll
+[submodule "function_traits"]
+	path = function_traits
+	url = https://github.com/garettbass/function_traits

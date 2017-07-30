@@ -4,13 +4,13 @@ namespace OBJC_NAMESPACE {
 
     library CoreFoundation {"CoreFoundation.framework/CoreFoundation"};
 
-    function_type<long(void*)>
-    const CFGetRetainCount { CoreFoundation.function("CFGetRetainCount") };
+    function_t<long(void*)>
+    const CFGetRetainCount { CoreFoundation("CFGetRetainCount") };
 
-    function_type<void(void*)>
-    const CFRelease { CoreFoundation.function("CFRelease") };
+    function_t<void(void*)>
+    const CFRelease { CoreFoundation("CFRelease") };
 
-    function_type<void*(void*)>
-    const CFRetain { CoreFoundation.function("CFRetain") };
+    function_t<void*(void*)>
+    const CFRetain { CoreFoundation("CFRetain") };
 
 } // namespace OBJC_NAMESPACE

@@ -3,6 +3,8 @@
 #include <ciso646>
 #include <cstddef>
 #include <cstdint>
+#include <iosfwd>
+#include <functional>
 #include <type_traits>
 
 #include "dll/cxx/push.h"
@@ -288,6 +290,51 @@ namespace OBJC_NAMESPACE {
         }
 
         using message_base<Result(Args...)>::send;
+    };
+
+    //--------------------------------------------------------------------------
+
+    enum access { readonly, readwrite };
+
+    template<access, typename Value>
+    struct property;
+
+    template<typename Value>
+    struct property<readonly,Value> {
+        message<Value()> get;
+
+        property(selector get) : get(get) {}
+
+        Value operator ()(object obj) const { return get((objc_object*)obj); }
+
+        Value operator ()(super sup) const { return get((objc_super&)(sup)); }
+
+        template<typename Self>
+        Value operator ()(Self* obj) const { return get((objc_object*)obj); }
+    };
+
+    template<typename Value>
+    struct property<readwrite,Value> : property<readonly,Value> {
+        using base = property<readonly,Value>;
+
+        message<void(Value)> set;
+
+        property(selector get, selector set) : base(get), set(set) {}
+
+        using base::operator();
+
+        void operator ()(object obj,Value v) const {
+            return set((objc_object*)obj,v);
+        }
+
+        void operator ()(super sup,Value v) const {
+            return set((objc_super&)(sup),v);
+        }
+
+        template<typename Self>
+        void operator ()(Self* obj,Value v) const {
+            return set((objc_object*)obj,v);
+        }
     };
 
     //--------------------------------------------------------------------------
@@ -679,3 +726,13 @@ namespace OBJC_NAMESPACE {
 
 #endif // CXX_OS_APPLE
 #include "dll/cxx/pop.h"
+
+std::ostream& operator <<(std::ostream& out, const OBJC_NAMESPACE::NSString* const s) {
+    return out << (s ? s->UTF8String() : "<null>");
+}
+
+std::ostream& operator <<(std::ostream& out, const OBJC_NAMESPACE::NSError* const e) {
+    OBJC_NAMESPACE::autoreleasepool autoreleasepool;
+    if (e) { return out << e->localizedDescription(); }
+    return out << "<null>";
+}

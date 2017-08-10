@@ -3,7 +3,7 @@
 #include <ciso646>
 #include <cstddef>
 #include <cstdint>
-#include <iosfwd>
+#include <iostream>
 #include <functional>
 #include <type_traits>
 

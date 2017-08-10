@@ -369,8 +369,12 @@ namespace OBJC_NAMESPACE {
 
     struct NSObject {
 
+        void operator delete(void* p) {
+            //printf("delete %s\n",class_getName(classof(object(p))));
+            CFRelease(p);
+        }
+
         void* operator new(size_t)             = delete;
-        void  operator delete(void* p)         { ((NSObject*)p)->release(); }
         NSObject()                             = delete;
         NSObject(NSObject&&)                   = delete;
         NSObject(const NSObject&)              = delete;

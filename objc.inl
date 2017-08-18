@@ -469,10 +469,8 @@ namespace OBJC_NAMESPACE {
 
         static
         NSAutoreleasePool*
-        alloc() { return NSObject::alloc<NSAutoreleasePool>(); }
-
-        NSAutoreleasePool*
-        init() { return NSObject::init<NSAutoreleasePool>(); }
+        newPool()
+        { return alloc<NSAutoreleasePool>()->init<NSAutoreleasePool>(); }
 
     };
 
@@ -482,10 +480,9 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     struct autoreleasepool {
-        NSAutoreleasePool* const pool = NSAutoreleasePool::alloc()->init();
+        NSAutoreleasePool* const pool { NSAutoreleasePool::newPool() };
         autoreleasepool() = default;
-        autoreleasepool(decltype(nullptr)) : pool(nullptr) {}
-       ~autoreleasepool() { delete pool; new(this) autoreleasepool(nullptr); }
+       ~autoreleasepool() { delete pool; }
     };
 
     //--------------------------------------------------------------------------

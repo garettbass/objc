@@ -498,6 +498,9 @@ namespace OBJC_NAMESPACE {
             classid cls {"NSArray"};
 
             message<NSArray*(NSObject*const*,NSUInteger)>
+            initWithObjects_count {"initWithObjects:count:"};
+
+            message<NSArray*(NSObject*const*,NSUInteger)>
             arrayWithObjects_count {"arrayWithObjects:count:"};
 
             message<NSUInteger()>
@@ -507,6 +510,14 @@ namespace OBJC_NAMESPACE {
             objectAtIndex {"objectAtIndex:"};
 
         } api;
+        
+        static
+        NSArray*
+        newArray(std::initializer_list<NSObject*> objects) {
+            return api.initWithObjects_count(
+                alloc<NSArray>(),objects.begin(),objects.size()
+            );
+        }
 
         static
         NSArray*
@@ -559,6 +570,10 @@ namespace OBJC_NAMESPACE {
             classid cls {"NSDictionary"};
 
             message<NSDictionary*(NSObject*const*,NSObject*const*,NSUInteger)>
+            initWithObjects_forKeys_count
+            {"initWithObjects:forKeys:count:"};
+
+            message<NSDictionary*(NSObject*const*,NSObject*const*,NSUInteger)>
             dictionaryWithObjects_forKeys_count
             {"dictionaryWithObjects:forKeys:count:"};
 
@@ -569,6 +584,19 @@ namespace OBJC_NAMESPACE {
             objectForKey {"objectForKey:"};
 
         } api;
+        
+        static
+        NSDictionary*
+        newDictionary(
+            std::initializer_list<NSObject*> objects,
+            std::initializer_list<NSObject*> keys
+        ) {
+            assert(objects.size() == keys.size());
+            return api.initWithObjects_forKeys_count(
+                alloc<NSDictionary>(),objects.begin(),keys.begin(),
+                std::min(objects.size(),keys.size())
+            );
+        }
 
         static
         NSDictionary*
@@ -594,6 +622,19 @@ namespace OBJC_NAMESPACE {
 
     template<typename KeyType, typename ObjectType>
     struct NSDictionary : NSDictionary<NSObject,NSObject> {
+
+        static
+        NSDictionary*
+        newDictionary(
+            std::initializer_list<ObjectType*> objects,
+            std::initializer_list<KeyType*>    keys
+        ) {
+            assert(objects.size() == keys.size());
+            return (NSDictionary*)api.initWithObjects_forKeys_count(
+                alloc<NSDictionary>(),objects.begin(),keys.begin(),
+                std::min(objects.size(),keys.size())
+            );
+        }
 
         static
         NSDictionary*
@@ -627,12 +668,21 @@ namespace OBJC_NAMESPACE {
             classid cls {"NSString"};
 
             message<NSString*(const char*)>
+            initWithUTF8String {"initWithUTF8String:"};
+
+            message<NSString*(const char*)>
             stringWithUTF8String {"stringWithUTF8String:"};
 
             message<const char*()>
             UTF8String {"UTF8String"};
 
         } api;
+        
+        static
+        NSString*
+        newString(const char* utf8String) {
+            return api.initWithUTF8String(alloc<NSString>(),utf8String);
+        }
 
         static
         NSString*
@@ -656,6 +706,10 @@ namespace OBJC_NAMESPACE {
         static struct API {
 
             classid cls {"NSError"};
+
+            message<NSError*(NSString*,NSInteger,UserInfo*)>
+            initWithDomain_code_userInfo
+            {"initWithDomain:code:userInfo:"};
 
             message<NSError*(NSString*,NSInteger,UserInfo*)>
             errorWithDomain_code_userInfo
@@ -683,6 +737,14 @@ namespace OBJC_NAMESPACE {
             localizedFailureReason {"localizedFailureReason"};
 
         } api;
+
+        static
+        NSError*
+        newError(NSString* domain, NSInteger code, UserInfo* userInfo) {
+            return api.initWithDomain_code_userInfo(
+                alloc<NSError>(),domain,code,userInfo
+            );
+        }
 
         static
         NSError*

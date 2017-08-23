@@ -480,9 +480,9 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     struct autoreleasepool {
-        NSAutoreleasePool* const pool { NSAutoreleasePool::newPool() };
+        void* const pool { objc_autoreleasePoolPush() };
         autoreleasepool() = default;
-       ~autoreleasepool() { delete pool; }
+       ~autoreleasepool() { objc_autoreleasePoolPop(pool); }
     };
 
     //--------------------------------------------------------------------------

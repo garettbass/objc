@@ -57,6 +57,16 @@ namespace OBJC_NAMESPACE {
         Foundation("ivar_getOffset")
     };
 
+    function_t<void(void*)>
+    const objc_autoreleasePoolPop {
+        Foundation("objc_autoreleasePoolPop")
+    };
+
+    function_t<void*()>
+    const objc_autoreleasePoolPush {
+        Foundation("objc_autoreleasePoolPush")
+    };
+
     function_t<Class(Class,const char*,size_t)>
     const objc_allocateClassPair {
         Foundation("objc_allocateClassPair")

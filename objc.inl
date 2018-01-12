@@ -54,7 +54,7 @@ namespace OBJC_NAMESPACE {
         bool operator ==(const selector& s) const { return sel == s.sel; }
         bool operator !=(const selector& s) const { return sel != s.sel; }
 
-        const char* name() const { return sel ? sel_getName(sel): nullptr; }
+        const char* name() const { return sel ? sel_getName(sel): "null"; }
     };
 
     //--------------------------------------------------------------------------
@@ -161,7 +161,7 @@ namespace OBJC_NAMESPACE {
         bool operator ==(const classid& c) const { return cls == c.cls; }
         bool operator !=(const classid& c) const { return cls != c.cls; }
 
-        const char* name() const { return cls ? class_getName(cls) : nullptr; }
+        const char* name() const { return cls ? class_getName(cls) : "null"; }
 
     private:
 
@@ -182,10 +182,12 @@ namespace OBJC_NAMESPACE {
     //--------------------------------------------------------------------------
 
     inline
-    classid classof(objc_object* obj) { return { obj }; }
+    classid classof(void* obj) { return { object(obj) }; }
+
+    //--------------------------------------------------------------------------
 
     inline
-    classid classof(super super) { return { super.super_class }; }
+    const char* classname(void* obj) { return classof(obj).name(); }
 
     //--------------------------------------------------------------------------
 
@@ -239,31 +241,6 @@ namespace OBJC_NAMESPACE {
 
     //--------------------------------------------------------------------------
 
-    template<typename>
-    struct implementation;
-
-    template<typename Result, typename... Args>
-    struct implementation<Result(Args...)> {
-        using IMP = Result(*)(id,SEL,Args...);
-
-        SEL const sel = nullptr;
-        IMP const imp = nullptr;
-
-        implementation(classid cls, selector sel)
-        : sel(sel), imp(IMP(class_getMethodImplementation(cls,sel))) {}
-
-        Result operator ()(object obj, Args... args) const {
-            return imp(obj,sel,args...);
-        }
-
-        template<typename Self>
-        Result operator ()(Self* obj, Args... args) const {
-            return imp((objc_object*)obj,sel,args...);
-        }
-    };
-
-    //--------------------------------------------------------------------------
-
     #include "detail/message_base.hpp"
 
     template<typename>
@@ -287,6 +264,44 @@ namespace OBJC_NAMESPACE {
         template<typename Self>
         Result operator ()(Self* obj, Args... args) const {
             return send((objc_object*)obj,sel,args...);
+        }
+
+        using message_base<Result(Args...)>::send;
+    };
+
+    //--------------------------------------------------------------------------
+
+    template<typename>
+    struct implementation;
+
+    template<typename Result, typename... Args>
+    struct implementation<Result(Args...)> : message_base<Result(Args...)> {
+        using IMP = Result(*)(objc_object*,selector,Args...);
+
+        SEL const sel = nullptr;
+        IMP const imp = nullptr;
+
+        implementation(classid cls, selector sel)
+        : sel(sel), imp(get(cls,sel)) {}
+
+        Result operator ()(object obj, Args... args) const {
+            return imp(obj,sel,args...);
+        }
+
+        Result operator ()(super sup, Args... args) const {
+            return send((objc_super&)(sup),sel,args...);
+        }
+
+        template<typename Self>
+        Result operator ()(Self* obj, Args... args) const {
+            return imp((objc_object*)obj,sel,args...);
+        }
+
+        static IMP get(classid cls, selector sel) {
+            IMP const imp = IMP(class_getMethodImplementation(cls,sel));
+            if (imp) { return imp; }
+            printf("%s::%s not found\n",cls.name(),sel.name());
+            return send;
         }
 
         using message_base<Result(Args...)>::send;
@@ -697,6 +712,10 @@ namespace OBJC_NAMESPACE {
     NSString::API
     NSString::api {};
 
+    std::ostream& operator <<(std::ostream& out, const NSString* const s) {
+        return out << (s ? s->UTF8String() : "<null>");
+    }
+
     //--------------------------------------------------------------------------
 
     struct NSError : NSObject {
@@ -781,6 +800,12 @@ namespace OBJC_NAMESPACE {
     NSError::API
     NSError::api {};
 
+    std::ostream& operator <<(std::ostream& out, const NSError* const e) {
+        autoreleasepool autoreleasepool;
+        if (e) { return out << e->localizedDescription(); }
+        return out << "<null>";
+    }
+
 } // namespace OBJC_NAMESPACE
 
 #else
@@ -789,13 +814,3 @@ namespace OBJC_NAMESPACE {
 
 #endif // CXX_OS_APPLE
 #include "dll/cxx/pop.h"
-
-std::ostream& operator <<(std::ostream& out, const OBJC_NAMESPACE::NSString* const s) {
-    return out << (s ? s->UTF8String() : "<null>");
-}
-
-std::ostream& operator <<(std::ostream& out, const OBJC_NAMESPACE::NSError* const e) {
-    OBJC_NAMESPACE::autoreleasepool autoreleasepool;
-    if (e) { return out << e->localizedDescription(); }
-    return out << "<null>";
-}
